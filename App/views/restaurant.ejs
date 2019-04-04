@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Header inclusion-->
+        <%- include template/header.ejs %>
+    </head>
+    <body>
+        <h1><%= title %></h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(var i=0; i<data.length; i++) { %>
+                    <tr>
+                        <td><%= data[i].name%></td>
+                        <td><%= data[i].type%></td>
+                        <td><%= data[i].description%></td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </body>
+</html>

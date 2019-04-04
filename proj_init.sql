@@ -151,6 +151,7 @@ insert into Users (uid, name, email, password) values ('dde6', 'Darleen De Angel
 insert into Users (uid, name, email, password) values ('bconant7', 'Boigie Conant', 'bconant7@cnn.com', 'XsRzBxO');
 insert into Users (uid, name, email, password) values ('aindruch8', 'Abra Indruch', 'aindruch8@wix.com', 'ziGUWE1s7C');
 insert into Users (uid, name, email, password) values ('tschermick9', 'Tammie Schermick', 'tschermick9@phoca.cz', 'idoXUol6Lu');
+insert into Users (uid, name, email, password) values ('pikachu1', 'Oliver Zheng', 'a@b.com', '123456');
 
 insert into Customers (uid, address, pNumber, rewardPt) values ('csimione1','7 Waywood Alley', '4042239432', 90);
 insert into Customers (uid, address, pNumber, rewardPt) values ('aormes2', '4915 Utah Drive', '9387835197', 25);
@@ -162,17 +163,18 @@ insert into Customers (uid, address, pNumber, rewardPt) values ('dde6','82 Brick
 insert into Customers (uid, address, pNumber, rewardPt) values ('bconant7','6386 Waxwing Street', '2961713117', 32);
 insert into Customers (uid, address, pNumber, rewardPt) values ('aindruch8','0 Holy Cross Plaza', '4965645255', 6);
 insert into Customers (uid, address, pNumber, rewardPt) values ('tschermick9','3274 Butterfield Terrace', '1828171768', 17);
+insert into Customers (uid, address, pNumber, rewardPt) values ('pikachu1','5 Olive Town', '1828171238', 100);
 
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('fMGw-322686322', 'ZEuPbXKANliLGdyBIgv', 'Italian', 'Pellentesque ultrices mattis odio.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('iAgm-601168182', 'ognTUpJODCNhMYlyImEkiqAzFHR', 'Carribean', 'Proin interdum mauris non ligula pellentesque ultrices.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('Zfna-146983352', 'FMcWOUkwxlNZd', 'Carribean', 'Quisque ut erat.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('WCpV-011495875', 'DSgAOUuEyVRzICtKclnZmrQHk', 'Greek', 'Nulla tellus.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('CquA-208726972', 'jPODiKkzghwSZUnLVtAlHRX', 'Greek', 'Suspendisse ornare consequat lectus.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('VWOv-225141445', 'xrkIbqHmctMPohdanGejKQFO', 'Greek', 'Phasellus sit amet erat.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('unAw-053722056', 'QCvdrSfOLZaInEVDYJBokPzcGliUm', 'Italian', 'Morbi vestibulum, velit id pretium iaculis, diam erat fermentum justo, nec condimentum neque sapien placerat ante.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('njYe-609049276', 'ntywcTYhXHGzSCFjxklOVaMmpqNbK', 'Mediterranean', 'Proin leo odio, porttitor id, consequat in, consequat ut, nulla.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('gBdC-272348696', 'itWXvRpSYouF', 'Japanese', 'Nullam sit amet turpis elementum ligula vehicula consequat.');
-INSERT INTO Restaurants (rid, name, type, description) VALUES ('ebGH-764302971', 'cqJUkOvneoftuGzMiQDXKWVsmbHSx', 'Carribean', 'Vestibulum rutrum rutrum neque.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('fMGw-322686322', 'Lo Scoglio', 'Italian', 'Pellentesque ultrices mattis odio.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('iAgm-601168182', 'La Mesa', 'Carribean', 'Proin interdum mauris non ligula pellentesque ultrices.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('Zfna-146983352', 'El Toro', 'Carribean', 'Quisque ut erat.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('WCpV-011495875', 'Apollo Greek Taverna', 'Greek', 'Nulla tellus.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('CquA-208726972', 'Komi', 'Greek', 'Suspendisse ornare consequat lectus.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('VWOv-225141445', 'Mrs.Greek', 'Greek', 'Phasellus sit amet erat.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('unAw-053722056', 'Pastaciutta', 'Italian', 'Morbi vestibulum, velit id pretium iaculis, diam erat fermentum justo, nec condimentum neque sapien placerat ante.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('njYe-609049276', 'Falafel King', 'Mediterranean', 'Proin leo odio, porttitor id, consequat in, consequat ut, nulla.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('gBdC-272348696', 'Ramen-ya', 'Japanese', 'Nullam sit amet turpis elementum ligula vehicula consequat.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('ebGH-764302971', 'El Mejillón', 'Carribean', 'Vestibulum rutrum rutrum neque.');
 
 INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('mHLy-664734', 'fMGw-322686322', '+27 816 806 7329', '3646 Drewry Terrace');
 INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('qojL-278179', 'iAgm-601168182', '+33 124 785 5818', '37 Sommers Road');
@@ -199,7 +201,7 @@ insert into Owners (uid, bid) values ('tschermick9', 'OjzP-192290');
 insert into Ratings (rtid, uid, score, review) values ('Mbxw1905', 'kyarnold0', 5, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu, adipiscing molestie, hendrerit at, vulputate vitae, nisl.');
 insert into Ratings (rtid, uid, score, review) values ('Cejl0089', 'csimione1', 10, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.');
 insert into Ratings (rtid, uid, score, review) values ('Hyjz3444', 'aormes2', 3, 'Donec semper sapien a libero. Nam dui. Proin leo odio, porttitor id, consequat in, consequat ut, nulla.');
-insert into Ratings (rtid, uid, score, review) values ('iXQd9925', 'sducarme3', 3, 'Duis aliquam convallis nunc.');
+insert into Ratings (rt\id, uid, score, review) values ('iXQd9925', 'sducarme3', 3, 'Duis aliquam convallis nunc.');
 insert into Ratings (rtid, uid, score, review) values ('mJCE6787', 'hdanell4', 3, 'Vestibulum quam sapien, varius ut, blandit non, interdum in, ante. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Duis faucibus accumsan odio. Curabitur convallis. Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor. Morbi vel lectus in quam fringilla rhoncus. Mauris enim leo, rhoncus sed, vestibulum sit amet, cursus id, turpis. Integer aliquet, massa id lobortis convallis, tortor risus dapibus augue, vel accumsan tellus nisi eu orci.');
 insert into Ratings (rtid, uid, score, review) values ('EaTB0221', 'bbrafferton5', 5, 'Nullam varius. Nulla facilisi. Cras non velit nec nisi vulputate nonummy. Maecenas tincidunt lacus at velit.');
 insert into Ratings (rtid, uid, score, review) values ('Sinw9859', 'dde6', 1, 'Phasellus in felis.');

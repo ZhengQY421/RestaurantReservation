@@ -7,8 +7,12 @@ var passport = require("passport");
 var session = require("session");
 var bodyParser = require("body-parser");
 
+require("dotenv").config();
+
+/* ---- Routers ---- */
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var restaurantRouter = require("./routes/restaurant");
 
 var app = express();
 
@@ -22,8 +26,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+/* ---- Using the Website ---- */
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/restaurant", restaurantRouter);
 
 /*
 app.use(
