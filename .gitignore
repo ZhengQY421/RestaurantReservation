@@ -1,0 +1,4 @@
+*.DS_Store
+App/bin
+App/node_modules
+.env
