@@ -7,14 +7,11 @@ const pool = new Pool({
 	connectionString: process.env.DATABASE_URL
 });
 
-/* SQL Query */
-var sql_query = 'SELECT * FROM Restaurants';
 
 router.get('/', function(req, res, next) {
-    console.log(process.env.DATABASE_URL);
-	pool.query(sql_query, (err, data) => {
+	pool.query('SELECT * FROM Restaurants', (err, data) => {
         console.log(err)
-		res.render('restaurant', { title: 'Restaurants', data: data.rows});
+		res.render('restaurant/restaurant', { title: 'Restaurants', data: data.rows});
 	});
 });
 
