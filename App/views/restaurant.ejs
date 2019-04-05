@@ -4,25 +4,22 @@
         <!-- Header inclusion-->
         <%- include template/header.ejs %>
     </head>
-    <body>
-        <h1><%= title %></h1>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% for(var i=0; i<data.length; i++) { %>
-                    <tr>
-                        <td><%= data[i].name%></td>
-                        <td><%= data[i].type%></td>
-                        <td><%= data[i].description%></td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
+    <body class="bg">
+        <%- include template/navbar.ejs %>
+        <br \>
+        <h1 class="hd" style="font-size: 3em;" ><%= title %></h1>
+        <br \>
+        <% for(var i =0; i<data.length; i++) { %>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= data[i].name%></h5>
+                        <h6 class="card-subtitle mb-2 text-muted"><%= data[i].type%></h6>
+                        <p class="card-text"><%= data[i].description%></p>
+                        <a href="#" class="card-link">More Information</a>
+                        <a href="#" class="card-link">Reserve</a>
+                    </div>
+                </div>
+                <br \>
+        <%} %>
     </body>
 </html>

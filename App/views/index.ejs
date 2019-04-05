@@ -5,34 +5,12 @@
 
     <!-- Header inclusion-->
     <%- include template/header.ejs %>
-
-    <!-- Background image-->
-    <style>
-      body,
-      html {
-        height: 100%;
-        margin: 0;
-      }
-
-      .bg {
-        /* The image used */
-        background-image: url("images/food-salad-restaurant-person.jpg");
-
-        /* Full height */
-        height: 100%;
-
-        /* Center and scale the image nicely */
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: full;
-      }
-    </style>
   </head>
   <body class="bg">
     <!-- Navbar  -->
     <%- include template/navbar.ejs %>
 
-    <h1 style="font-size: 6em; color:white; text-shadow: 2px 2px gray; font-family:'Patua One';">
+    <h1 class="hd" style="font-size: 6em;">
       Welcome to <br />
       Restaurant Reservation.
     </h1>
@@ -51,7 +29,7 @@
         </div>
       </form>
       <br /><br /><br />
-      <h2 style = "color:white; text-shadow: 2px 2px gray; font-family:'Patua One';">
+      <h2 class="hd">
         Can't decide where to eat? 
       </h2>
       <a class="btn btn-success" href="/restaurant">Show me some restaurants!</a>
