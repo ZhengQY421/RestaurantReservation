@@ -3,11 +3,19 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-var passport = require("passport");
-var session = require("session");
 var bodyParser = require("body-parser");
+var passport = require("passport");
+var session = require("express-session");
+var flash = require("express-flash");
 
+// Use dotenv package to load custom .env file
 require("dotenv").config();
+
+/* Connect to Database */
+const { Pool } = require('pg');
+const pool = new Pool({
+	connectionString: process.env.DATABASE_URL
+});
 
 /* ---- Routers ---- */
 var indexRouter = require("./routes/index");
@@ -27,13 +35,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-/* ---- Using the Website ---- */
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/restaurant", restaurantRouter);
-app.use("/account", accountRouter);
-
-/*
+/* ---- Basically initializes the session ---- */
 app.use(
   session({
     secret: process.env.SECRET,
@@ -41,31 +43,23 @@ app.use(
     saveUninitialized: true
   })
 );
-*/
+app.use(flash());
 
 /*Body Parser */
 app.use(bodyParser.urlencoded({ extended: true }));
-app.get('/', (req, res) => res.sendFile('auth.html', { root : __dirname}));
-
-const port = process.env.PORT || 5000;
-app.listen(port , () => console.log('App listening on port ' + port));
 
 /*Passport Setup */
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/success', (req, res) => res.send("Welcome "+req.query.username+"!!"));
-app.get('/error', (req, res) => res.send("error logging in"));
-
-
-/*Modify with proper id*/
+/* ---- Grab the data needed from users ---- */
 passport.serializeUser(function(user, cb) {
-  cb(null, user.id);
+  cb(null, user.uid);
 });
 
 passport.deserializeUser(function(user, cb) {
   pool.query(
-    "select id, email, firstName, lastName, isUser, isWorker, isAdmin from accounts natural join accountTypes where id=$1",
+    "select uid, name, email, password from Users where uid=$1",
     [user],
     function(err, data) {
       cb(err, data.rows[0]);
@@ -73,40 +67,37 @@ passport.deserializeUser(function(user, cb) {
   );
 });
 
-/*
-1. Query the database for a matching account
-2. Send success authetication if so, and don't 
-
-Friend's example:
+/* ---- Stuff used to authenticate ---- */
 const LocalStrategy = require("passport-local").Strategy;
 passport.use(
-  "local",
-  new LocalStrategy(function(email, password, done) {
-    pool.query("select salt from accounts where email=$1", [email], function(
-      err,
-      data
-    ) {
-      if (err) return done(err);
-      if (data.rowCount === 0)
-        return done(null, false, {
-          message: "You entered an incorrect email or password!"
-        });
-      pool.query(
-        "select id, email, firstName, lastName, isUser, isWorker, isAdmin from accounts natural join accountTypes where email=$1 and hash=$2",
-        [email, getPasswordHash(data.rows[0].salt, password)],
-        function(err, data) {
-          if (err) return done(err);
-          if (data.rowCount === 0)
-            return done(null, false, {
-              message: "You entered an incorrect email or password!"
-            });
-          return done(null, data.rows[0]);
+  "local", new LocalStrategy (function(email, password, done) {
+    pool.query(
+      "select uid, name, email, password from Users where email=$1 and password = $2",
+      [email, password], 
+      function(err, data){
+        if (err){
+          return done(err); 
+        } 
+        if (data.rowCount === 0){
+          console.log(email + " " + password);
+          return done(null, false, {message: "Invalid email/password!"}); 
         }
-      );
-    });
+        return done(null, data.rows[0]); 
+      });
   })
 );
-*/
+
+/* ---- Using the Website ---- */
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
+app.use("/restaurant", restaurantRouter);
+app.use("/account", accountRouter);
+
+/* ---- Getting the local user ---- */
+app.use(function(req,res,next){
+  res.locals.currentUser = req.user;
+  next();
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,3 +1,38 @@
+
+<% if (messages.info) { %> <% for (let i = 0; i < messages.info.length; i++) {
+  %>
+  <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <strong>Hey!</strong> <%= messages.info[i] %>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <% } %> <% } %> <% if (messages.warning) { %> <% for (let i = 0; i <
+  messages.warning.length; i++) { %>
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>Watch Out!</strong> <%= messages.warning[i] %>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <% } %> <% } %> <% if (messages.error) { %> <% for (let i = 0; i <
+  messages.error.length; i++) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>Attention!</strong> <%= messages.error[i] %>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <% } %> <% } %> <% if (messages.success) { %> <% for (let i = 0; i <
+  messages.success.length; i++) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Success!</strong> <%= messages.success[i] %>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <% } %> <% } %>
+
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#e8f4eb;">
   <span class="navbar-brand mb-0 h1">Restaurant Reservation</span>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -13,7 +48,9 @@
               <a class="nav-link" href="/restaurant">Restuarants <span class="sr-only">(current)</span></a>
             </li>
         </ul>
-        <ul class="navbar-nav ml-auto">
+
+        <% if (!currentUser) { %>
+          <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
               <button class="btn btn-success my-2 my-sm-0 mx-2" data-toggle="modal" data-target="#loginModal">Log In <span class="sr-only"></span></a>
                 </li>
@@ -21,7 +58,26 @@
                   <button class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#signupModal">Sign Up <span class="sr-only">(current)</span></a>
                 </li>
             </ul>
-            
+        <% } else {%>
+          <ul class="navbar-nav ml-auto">
+              <li class="navbar-text" style="color:black">
+                  Welcome,
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color:black">
+                  <b><%= currentUser.name %></b>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="#">Profile</a>
+                  <a class="dropdown-item" href="#">Reservation</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="btn btn-danger mx-4" href="/account/logout">Log Out</a>
+                </div>
+              </li>
+
+          </ul>
+        <% } %>
+    
 </nav>
 
 <!-- Modals -->
@@ -35,14 +91,14 @@
         </button>
       </div>
       <div class="modal-body">
-          <form>
+          <form action = "/account/login" method ="post">
               <div class="form-group mx-1 my-2">
                 <label for="loginEmail">Email address</label>
-                <input type="email" class="form-control" id="loginEmail" aria-describedby="emailHelp" placeholder="someone@example.com">
+                <input type="email" class="form-control" id="username" name="username" aria-describedby="emailHelp" placeholder="someone@example.com">
               </div>
               <div class="form-group mx-1">
                 <label for="loginPassword">Password</label>
-                <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
               </div>
               
               <button type="submit" class="btn btn-primary mx-1 my-2">Submit</button>
@@ -62,7 +118,7 @@
           </button>
         </div>
         <div class="modal-body">
-            <form>
+            <form action ="/account/signup" method = "post">
                   <div class ="form-group">
                     <label for="signupName">Name</label>
                     <input class="form-control" id="signupName" placeholder="First Last">
