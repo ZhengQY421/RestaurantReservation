@@ -49,6 +49,7 @@ create table Branches (
     rid VARCHAR(50),
     pNumber VARCHAR(20),
     address VARCHAR(50),
+    location TEXT,
     primary key (bid),
     foreign key (rid) references Restaurants (rid) on delete cascade
 );
@@ -176,16 +177,16 @@ INSERT INTO Restaurants (rid, name, type, description) VALUES ('njYe-609049276',
 INSERT INTO Restaurants (rid, name, type, description) VALUES ('gBdC-272348696', 'Ramen-ya', 'Japanese', 'Nullam sit amet turpis elementum ligula vehicula consequat.');
 INSERT INTO Restaurants (rid, name, type, description) VALUES ('ebGH-764302971', 'El Mejillón', 'Carribean', 'Vestibulum rutrum rutrum neque.');
 
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('mHLy-664734', 'fMGw-322686322', '+27 816 806 7329', '3646 Drewry Terrace');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('qojL-278179', 'iAgm-601168182', '+33 124 785 5818', '37 Sommers Road');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('PwNr-270848', 'Zfna-146983352', '+62 173 982 3684', '830 Rigney Drive');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('EFUI-983629', 'WCpV-011495875', '+63 732 509 2140', '6 Dayton Crossing');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('hwaA-126728', 'CquA-208726972', '+359 793 675 4054', '8179 Laurel Parkway');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('RGxs-464381', 'VWOv-225141445', '+54 958 380 1486', '26107 Mcguire Place');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('ylpx-290411', 'unAw-053722056', '+86 968 908 1787', '6136 Cardinal Street');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('OjzP-192290', 'njYe-609049276', '+216 836 236 9765', '475 Melby Road');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('vqRn-592271', 'gBdC-272348696', '+63 150 562 9719', '81944 Onsgard Point');
-INSERT INTO Branches (bid, rid, pNumber, address) VALUES ('uyev-477440', 'ebGH-764302971', '+502 168 507 2788', '138 Jackson Alley');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('mHLy-664734', 'fMGw-322686322', '+27 816 806 7329', '3646 Drewry Terrace', 'CapiLand');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('qojL-278179', 'iAgm-601168182', '+33 124 785 5818', '37 Sommers Road', 'Jurong East');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('PwNr-270848', 'Zfna-146983352', '+62 173 982 3684', '830 Rigney Drive', 'Clarke Quay');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('EFUI-983629', 'WCpV-011495875', '+63 732 509 2140', '6 Dayton Crossing', 'Mars');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('hwaA-126728', 'CquA-208726972', '+359 793 675 4054', '8179 Laurel Parkway', 'Over Rainbow');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('RGxs-464381', 'VWOv-225141445', '+54 958 380 1486', '26107 Mcguire Place', 'Pallet Town');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('ylpx-290411', 'unAw-053722056', '+86 968 908 1787', '6136 Cardinal Street', 'Mushroom Kingdom');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('OjzP-192290', 'njYe-609049276', '+216 836 236 9765', '475 Melby Road', 'Emory University');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('vqRn-592271', 'gBdC-272348696', '+63 150 562 9719', '81944 Onsgard Point', 'Itomori Square');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('uyev-477440', 'ebGH-764302971', '+502 168 507 2788', '138 Jackson Alley', 'Neverland');
 
 insert into Owners (uid, bid) values ('kyarnold0', 'mHLy-664734');
 insert into Owners (uid, bid) values ('csimione1', 'qojL-278179');
