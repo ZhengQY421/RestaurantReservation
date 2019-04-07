@@ -45,10 +45,18 @@ app.use(
 
 /*Body Parser */
 app.use(bodyParser.urlencoded({ extended: true }));
+app.get('/', (req, res) => res.sendFile('auth.html', { root : __dirname}));
+
+const port = process.env.PORT || 5000;
+app.listen(port , () => console.log('App listening on port ' + port));
 
 /*Passport Setup */
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.get('/success', (req, res) => res.send("Welcome "+req.query.username+"!!"));
+app.get('/error', (req, res) => res.send("error logging in"));
+
 
 /*Modify with proper id*/
 passport.serializeUser(function(user, cb) {
