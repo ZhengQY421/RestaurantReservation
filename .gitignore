@@ -4,3 +4,4 @@ App/node_modules
 App/bin
 App/node_modules
 App/env
+.gitignore
