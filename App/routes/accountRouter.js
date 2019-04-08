@@ -18,6 +18,17 @@ function failRegister(req, res) {
     res.redirect("/");
 }
 
+function makeid(name) {
+    
+    var loc = name.indexOf(" "); 
+    var first = name.slice(0,loc).toLowerCase();
+    var last = name.slice(loc+1).toLowerCase();
+    last.replace(" ", "");
+    var digit = Math.floor(Math.random() * 11);
+    
+    return first.slice(0,1)+last+digit+"";
+  }
+
 /* ---- Post Function for Login ---- */
 router.all('/login', checkLoggedOut,
 passport.authenticate("local", {
@@ -48,13 +59,28 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
             } else{
 
                 if (data.rowCount === 0){
+
+                    var name = req.body.signupName;
+                    var email = req.body.signupEmail;
+                    var password = req.body.signupPassword;
+                    var uid = makeid(name);  
+                    var addr = req.body.signupAddr;
+                    var pNum = req.body.signupPNum;
+
+                    pool.query("INSERT INTO User VALUES" + "('" + uid + "','" + name + "','" + email + "," + password + ")", (err,data) => {
+                        if (err) {
+                            return console.error('Error executing query', err.stack)
+                          }
+                        console.log(result.rows[0].name)
+                    });
+                    
                     var sql_query = ""; 
 
                     if (req.body.signupType === "Customer"){
-                        sql_query = "INSERT INTO Customer VALUES";
+                        sql_query = "INSERT INTO Customer VALUES" + "('" + uid + "','" + addr + "','" + pNum + ", 0" +  + ")";
 
                     }else if (req.body.signupType === "Owner"){
-
+                        sql_query = "INSERT INTO Owners VALUES" + "('" + uid + "','" + addr + "','" + pNum + ", 0" +  + ")";
                     }
 
                 }else {
