@@ -56,8 +56,8 @@ create table Branches (
 
 create table Owners (
     uid             VARCHAR(50),
-    bid             VARCHAR(50) NOT NULL UNIQUE,
-    primary key (uid,bid),
+    bid             VARCHAR(50) UNIQUE,
+    primary key (uid),
     foreign key (uid) references Users (uid) on delete cascade,
     foreign key (bid) references Branches (bid) on delete cascade
 );
@@ -314,11 +314,11 @@ insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('l4','OjzP-
 insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('c2','vqRn-592271','HlVb5951', '12PM', TRUE, 2);
 
 CREATE OR REPLACE FUNCTION branch_location_check()
-RETURNS TRIGGER AS 
+RETURNS TRIGGER AS
 $$
 DECLARE count NUMERIC;
-BEGIN 
-    SELECT COUNT(*) into count 
+BEGIN
+    SELECT COUNT(*) into count
     FROM Branches B
     WHERE NEW.rid = B.rid
     AND NEW.location = B.location;
@@ -328,7 +328,7 @@ BEGIN
     ELSE
         RETURN NEW;
     END IF;
-END; 
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER branch_location_check
