@@ -157,17 +157,6 @@ insert into Users (uid, name, email, password) values ('bconant7', 'Boigie Conan
 insert into Users (uid, name, email, password) values ('aindruch8', 'Abra Indruch', 'aindruch8@wix.com', 'ziGUWE1s7C');
 insert into Users (uid, name, email, password) values ('tschermick9', 'Tammie Schermick', 'tschermick9@phoca.cz', 'idoXUol6Lu');
 insert into Users (uid, name, email, password) values ('pikachu1', 'Oliver Zheng', 'a@b.com', '123456');
-insert into Users (uid, name, email, password) values ('cgallanders0', 'Clarine Gallanders', 'cgallanders0@51.la', 'Bt7XSuPxkKQn');
-insert into Users (uid, name, email, password) values ('greynault1', 'Gage Reynault', 'greynault1@photobucket.com', 'PkHLDGnRgw');
-insert into Users (uid, name, email, password) values ('gwitard2', 'Gradey Witard', 'gwitard2@macromedia.com', 'vuXSMsO');
-insert into Users (uid, name, email, password) values ('ddawtre3', 'Darrick Dawtre', 'ddawtre3@illinois.edu', 'MXw2Yuk4OFvy');
-insert into Users (uid, name, email, password) values ('hraffan4', 'Hamil Raffan', 'hraffan4@mashable.com', 'L1wVrK');
-insert into Users (uid, name, email, password) values ('emcclaughlin5', 'Eldredge McClaughlin', 'emcclaughlin5@w3.org', 'jK6H8C');
-insert into Users (uid, name, email, password) values ('tbonde6', 'Thedric Bonde', 'tbonde6@foxnews.com', 'oDWLku2vsl8O');
-insert into Users (uid, name, email, password) values ('ebigly7', 'Edward Bigly', 'ebigly7@g.co', 'vPG7fSuIdXX');
-insert into Users (uid, name, email, password) values ('hwalduck8', 'Hatti Walduck', 'hwalduck8@google.es', 'ysYrpWR');
-insert into Users (uid, name, email, password) values ('vlangeren9', 'Vernen Langeren', 'vlangeren9@boston.com', 'niITux2mVLlV');
-
 
 insert into Customers (uid, address, pNumber, rewardPt) values ('csimione1','7 Waywood Alley', '40422394', 90);
 insert into Customers (uid, address, pNumber, rewardPt) values ('aormes2', '4915 Utah Drive', '93878351', 25);
@@ -203,17 +192,16 @@ INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('OjzP-192290
 INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('vqRn-592271', 'gBdC-272348696', '15059719', '81944 Onsgard Point', 'Itomori Square');
 INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('uyev-477440', 'ebGH-764302971', '16502788', '138 Jackson Alley', 'Neverland');
 
-insert into Owners (uid, bid) values ('cgallanders0', 'mHLy-664734');
-insert into Owners (uid, bid) values ('greynault1', 'qojL-278179');
-insert into Owners (uid, bid) values ('gwitard2', 'uyev-477440');
-insert into Owners (uid, bid) values ('ddawtre3', 'EFUI-983629');
-insert into Owners (uid, bid) values ('hraffan4', 'RGxs-464381');
-insert into Owners (uid, bid) values ('emcclaughlin5', 'hwaA-126728');
-insert into Owners (uid, bid) values ('tbonde6', 'vqRn-592271');
-insert into Owners (uid, bid) values ('ebigly7', 'PwNr-270848');
-insert into Owners (uid, bid) values ('hwalduck8', 'ylpx-290411');
-insert into Owners (uid, bid) values ('vlangeren9', 'OjzP-192290');
-
+insert into Owners (uid, bid) values ('kyarnold0', 'mHLy-664734');
+insert into Owners (uid, bid) values ('csimione1', 'qojL-278179');
+insert into Owners (uid, bid) values ('aormes2', 'uyev-477440');
+insert into Owners (uid, bid) values ('sducarme3', 'EFUI-983629');
+insert into Owners (uid, bid) values ('hdanell4', 'RGxs-464381');
+insert into Owners (uid, bid) values ('bbrafferton5', 'hwaA-126728');
+insert into Owners (uid, bid) values ('dde6', 'vqRn-592271');
+insert into Owners (uid, bid) values ('bconant7', 'PwNr-270848');
+insert into Owners (uid, bid) values ('aindruch8', 'ylpx-290411');
+insert into Owners (uid, bid) values ('tschermick9', 'OjzP-192290');
 
 insert into Ratings (rtid, uid, score, review) values ('Mbxw1905', 'kyarnold0', 5, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu, adipiscing molestie, hendrerit at, vulputate vitae, nisl.');
 insert into Ratings (rtid, uid, score, review) values ('Cejl0089', 'csimione1', 10, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.');
