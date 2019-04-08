@@ -27,6 +27,15 @@ router.all('/logout', checkLoggedIn, function(req,res,next){
 })
 
 /* ---- Post Function for Sign up ---- */
+router.post('/signup', checkLoggedOut, function(req, res, next){
+
+    if(req.body.signupType === ""){
+        console.log("Pikachu")
+        req.flash("warning","You must pick an account type!");
+        return;
+    }
+    
+})
 
 module.exports = router;
 
