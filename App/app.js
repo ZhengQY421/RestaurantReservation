@@ -22,6 +22,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var restaurantRouter = require("./routes/restaurantRouter");
 var accountRouter = require("./routes/accountRouter");
+var rewardRouter = require("./routes/rewardRouter");
 
 var app = express();
 
@@ -73,16 +74,16 @@ passport.use(
   "local", new LocalStrategy (function(email, password, done) {
     pool.query(
       "select uid, name, email, password from Users where email=$1 and password = $2",
-      [email, password], 
+      [email, password],
       function(err, data){
         if (err){
-          return done(err); 
-        } 
+          return done(err);
+        }
         if (data.rowCount === 0){
           console.log(email + " " + password);
-          return done(null, false, {message: "Invalid email/password!"}); 
+          return done(null, false, {message: "Invalid email/password!"});
         }
-        return done(null, data.rows[0]); 
+        return done(null, data.rows[0]);
       });
   })
 );
@@ -92,6 +93,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/restaurant", restaurantRouter);
 app.use("/account", accountRouter);
+app.use("/reward", rewardRouter);
 
 /* ---- Getting the local user ---- */
 app.use(function(req,res,next){

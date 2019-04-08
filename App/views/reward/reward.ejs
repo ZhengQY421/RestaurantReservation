@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Header inclusion-->
+        <%- include ../template/header.ejs %>
+    </head>
+    <body class="bg">
+
+        <%- include ../template/navbar.ejs %>
+
+
+        <br \>
+        <h1 class="hd" style="font-size: 3em;" ><%= title %></h1>
+        <br \>
+        <% for(var i =0; i<data.length; i++) { %>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= data[i].iid%></h5>
+                    </div>
+                </div>
+                <br \>
+        <%} %>
+
+
+        </body>
+</html>
