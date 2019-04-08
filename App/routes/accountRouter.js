@@ -43,6 +43,25 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
     pool.query(
         "select 1 from accounts where email=$1;",[req.body.signupEmail],
         function(err,data){
+            if(err){
+                failRegister(req, res);
+            } else{
+
+                if (data.rowCount === 0){
+                    var sql_query = ""; 
+
+                    if (req.body.signupType === "Customer"){
+                        sql_query = "INSERT INTO Customer VALUES";
+
+                    }else if (req.body.signupType === "Owner"){
+
+                    }
+
+                }else {
+                    req.flash("warning", "Account already exists, please login.")
+                    res.redirect("/")
+                }
+            }
 
         }
     )
