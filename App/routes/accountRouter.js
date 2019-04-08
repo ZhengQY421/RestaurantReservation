@@ -2,10 +2,21 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 
+/* Connect to Database */
+const { Pool } = require('pg');
+const pool = new Pool({
+	connectionString: process.env.DATABASE_URL
+});
+
 const {
     checkLoggedIn,
     checkLoggedOut,
 } = require("./middleware/auth");
+
+function failRegister(req, res) {
+    req.flash("error", "Sorry, an error has occurred. Please try again later.");
+    res.redirect("/");
+}
 
 /* ---- Post Function for Login ---- */
 router.all('/login', checkLoggedOut,
@@ -29,12 +40,12 @@ router.all('/logout', checkLoggedIn, function(req,res,next){
 /* ---- Post Function for Sign up ---- */
 router.post('/signup', checkLoggedOut, function(req, res, next){
 
-    if(req.body.signupType === ""){
-        console.log("Pikachu")
-        req.flash("warning","You must pick an account type!");
-        return;
-    }
-    
+    pool.query(
+        "select 1 from accounts where email=$1;",[req.body.signupEmail],
+        function(err,data){
+
+        }
+    )
 })
 
 module.exports = router;
