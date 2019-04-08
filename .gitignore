@@ -2,3 +2,6 @@
 App/node_modules
 *.env
 App/bin
+App/bin
+App/node_modules
+App/.env
