@@ -16,7 +16,7 @@ const { Pool } = require('pg');
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL
 });
-
+\
 /* ---- Routers ---- */
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
