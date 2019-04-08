@@ -15,10 +15,10 @@ DROP TABLE IF EXISTS Reserves CASCADE;
 DROP TABLE IF EXISTS Photos CASCADE;
 
 create table Users (
-    uid VARCHAR(50),
-    name VARCHAR(50),
-    email VARCHAR(50),
-    password VARCHAR(50),
+    uid             VARCHAR(50),
+    name            VARCHAR(50),
+    email           VARCHAR(50) UNIQUE,
+    password        VARCHAR(50),
     primary key (uid)
 );
 
@@ -27,10 +27,10 @@ create table Users (
 -- one to one relationship !!:////
 -- https://stackoverflow.com/questions/10982992/is-it-fine-to-have-foreign-key-as-primary-key
 create table Customers (
-    uid VARCHAR(50),
-    address VARCHAR(50),
-    pNumber VARCHAR(50),
-    rewardPt INT,
+    uid             VARCHAR(50),
+    address         VARCHAR(50),
+    pNumber         VARCHAR(8),
+    rewardPt        INT,
     foreign key (uid) references Users on delete cascade
 );
 
@@ -45,34 +45,34 @@ create table Restaurants (
 
 --this is ok, doesn't imply one to one relationship
 create table Branches (
-    bid VARCHAR(50),
-    rid VARCHAR(50),
-    pNumber VARCHAR(20),
-    address VARCHAR(50),
-    location TEXT,
+    bid             VARCHAR(50),
+    rid             VARCHAR(50),
+    pNumber         VARCHAR(8),
+    address         VARCHAR(50),
+    location        TEXT,
     primary key (bid),
     foreign key (rid) references Restaurants (rid) on delete cascade
 );
 
 create table Owners (
-    uid VARCHAR(50),
-    bid VARCHAR(50),
+    uid             VARCHAR(50),
+    bid             VARCHAR(50) NOT NULL UNIQUE,
     primary key (uid,bid),
     foreign key (uid) references Users (uid) on delete cascade,
     foreign key (bid) references Branches (bid) on delete cascade
 );
 
 create table Ratings (
-        rtid VARCHAR(50),
-        uid VARCHAR(50),
-        score INT,
-        review TEXT,
-        primary key (rtid),
-        foreign key (uid) references Users (uid) on delete cascade
+    rtid            VARCHAR(50),
+    uid             VARCHAR(50),
+    score           INT,
+    review          TEXT,
+    primary key (rtid),
+    foreign key (uid) references Users (uid) on delete cascade
 );
 
 CREATE TABLE Incentives (
-    iid         VARCHAR(20),
+    iid             VARCHAR(20),
     primary key (iid)
 );
 
@@ -80,44 +80,44 @@ CREATE TABLE Incentives (
 -- but i think should have rid or bid also, not just some random voucher
 -- same issue as above... foreign key should prob not be primary key
 CREATE TABLE Discounts (
-    iid         VARCHAR(20),
-    percent     INTEGER,
+    iid             VARCHAR(20),
+    percent         INT check(percent > 0 and percent <= 100),
     PRIMARY KEY (iid),
     FOREIGN KEY (iid) REFERENCES Incentives (iid) on delete cascade
 );
 
 -- same issue as above... foreign key should prob not be primary key
 CREATE TABLE Rewards (
-    iid         VARCHAR(20),
-    rewardName       TEXT,
-    value       INTEGER,
+    iid             VARCHAR(20),
+    rewardName      TEXT,
+    value           INT check(value > 0),
     PRIMARY KEY (iid),
     FOREIGN KEY (iid) REFERENCES Incentives (iid) on delete cascade
 );
 
 create table Choose (
-    timeStamp DATE,
-    uid VARCHAR(50),
-    iid VARCHAR(20),
+    timeStamp       TIMESTAMPTZ,
+    uid             VARCHAR(50),
+    iid             VARCHAR(20),
     foreign key (uid) references Users (uid) on delete cascade,
     foreign key (iid) references Incentives (iid) on delete cascade
 );
 
 create table Gives  (
-    timeStamp DATE,
-    uid VARCHAR(50),
-    rtid VARCHAR(50),
-    bid varchar(50),
+    timeStamp       TIMESTAMPTZ,
+    uid             VARCHAR(50),
+    rtid            VARCHAR(50),
+    bid             VARCHAR(50),
     foreign key (rtid) references Ratings (rtid) on delete cascade,
     foreign key (uid) references Users (uid) on delete cascade,
     foreign key (bid) references Branches (bid) on delete cascade
 );
 
 create table Response (
-    timeStamp DATE,
-    rtid VARCHAR(50),
-    bid VARCHAR(50),
-    textResponse TEXT
+    timeStamp       TIMESTAMPTZ,
+    rtid            VARCHAR(50),
+    bid             VARCHAR(50),
+    textResponse    TEXT
 
 );
 
@@ -131,15 +131,19 @@ CREATE TABLE  Photos (
 );
 
 create table Reserves (
-    reserveId VARCHAR(50),
-    timeStamp DATE,
-    guestCount INT
+    reserveId       VARCHAR(50),
+    timeStamp       TIMESTAMPTZ,
+    guestCount      INT CHECK(guestCount > 0)
 );
 
 create table Tables (
-    tid VARCHAR(20),
-    bid VARCHAR(50),
-    reserveId VARCHAR(50)
+    tid             VARCHAR(20),
+    bid             VARCHAR(50),
+    reserveId       VARCHAR(50),
+    time            VARCHAR(4),
+    vacant          BOOLEAN,
+    seats           INT CHECK(seats > 0),
+    PRIMARY KEY (tid, time)
 );
 
 insert into Users (uid, name, email, password) values ('kyarnold0', 'Kelci Yarnold', 'kyarnold0@pen.io', 'LokKcX');
@@ -154,17 +158,17 @@ insert into Users (uid, name, email, password) values ('aindruch8', 'Abra Indruc
 insert into Users (uid, name, email, password) values ('tschermick9', 'Tammie Schermick', 'tschermick9@phoca.cz', 'idoXUol6Lu');
 insert into Users (uid, name, email, password) values ('pikachu1', 'Oliver Zheng', 'a@b.com', '123456');
 
-insert into Customers (uid, address, pNumber, rewardPt) values ('csimione1','7 Waywood Alley', '4042239432', 90);
-insert into Customers (uid, address, pNumber, rewardPt) values ('aormes2', '4915 Utah Drive', '9387835197', 25);
-insert into Customers (uid, address, pNumber, rewardPt) values ('kyarnold0','37529 8th Park', '2299409576', 13);
-insert into Customers (uid, address, pNumber, rewardPt) values ('sducarme3','6 Clove Drive', '5319398655', 6);
-insert into Customers (uid, address, pNumber, rewardPt) values ('hdanell4','834 Hollow Ridge Park', '9737475346', 54);
-insert into Customers (uid, address, pNumber, rewardPt) values ('bbrafferton5','45 Cambridge Parkway', '7807316897', 99);
-insert into Customers (uid, address, pNumber, rewardPt) values ('dde6','82 Brickson Park Alley', '2058110589', 2);
-insert into Customers (uid, address, pNumber, rewardPt) values ('bconant7','6386 Waxwing Street', '2961713117', 32);
-insert into Customers (uid, address, pNumber, rewardPt) values ('aindruch8','0 Holy Cross Plaza', '4965645255', 6);
-insert into Customers (uid, address, pNumber, rewardPt) values ('tschermick9','3274 Butterfield Terrace', '1828171768', 17);
-insert into Customers (uid, address, pNumber, rewardPt) values ('pikachu1','5 Olive Town', '1828171238', 100);
+insert into Customers (uid, address, pNumber, rewardPt) values ('csimione1','7 Waywood Alley', '40422394', 90);
+insert into Customers (uid, address, pNumber, rewardPt) values ('aormes2', '4915 Utah Drive', '93878351', 25);
+insert into Customers (uid, address, pNumber, rewardPt) values ('kyarnold0','37529 8th Park', '22994095', 13);
+insert into Customers (uid, address, pNumber, rewardPt) values ('sducarme3','6 Clove Drive', '53193985', 6);
+insert into Customers (uid, address, pNumber, rewardPt) values ('hdanell4','834 Hollow Ridge Park', '37475346', 54);
+insert into Customers (uid, address, pNumber, rewardPt) values ('bbrafferton5','45 Cambridge Parkway', '07316897', 99);
+insert into Customers (uid, address, pNumber, rewardPt) values ('dde6','82 Brickson Park Alley', '20580589', 2);
+insert into Customers (uid, address, pNumber, rewardPt) values ('bconant7','6386 Waxwing Street', '21713117', 32);
+insert into Customers (uid, address, pNumber, rewardPt) values ('aindruch8','0 Holy Cross Plaza', '45645255', 6);
+insert into Customers (uid, address, pNumber, rewardPt) values ('tschermick9','3274 Butterfield Terrace', '28171768', 17);
+insert into Customers (uid, address, pNumber, rewardPt) values ('pikachu1','5 Olive Town', '18281712', 100);
 
 INSERT INTO Restaurants (rid, name, type, description) VALUES ('fMGw-322686322', 'Lo Scoglio', 'Italian', 'Pellentesque ultrices mattis odio.');
 INSERT INTO Restaurants (rid, name, type, description) VALUES ('iAgm-601168182', 'La Mesa', 'Carribean', 'Proin interdum mauris non ligula pellentesque ultrices.');
@@ -177,16 +181,16 @@ INSERT INTO Restaurants (rid, name, type, description) VALUES ('njYe-609049276',
 INSERT INTO Restaurants (rid, name, type, description) VALUES ('gBdC-272348696', 'Ramen-ya', 'Japanese', 'Nullam sit amet turpis elementum ligula vehicula consequat.');
 INSERT INTO Restaurants (rid, name, type, description) VALUES ('ebGH-764302971', 'El Mejillón', 'Carribean', 'Vestibulum rutrum rutrum neque.');
 
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('mHLy-664734', 'fMGw-322686322', '+27 816 806 7329', '3646 Drewry Terrace', 'CapiLand');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('qojL-278179', 'iAgm-601168182', '+33 124 785 5818', '37 Sommers Road', 'Jurong East');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('PwNr-270848', 'Zfna-146983352', '+62 173 982 3684', '830 Rigney Drive', 'Clarke Quay');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('EFUI-983629', 'WCpV-011495875', '+63 732 509 2140', '6 Dayton Crossing', 'Mars');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('hwaA-126728', 'CquA-208726972', '+359 793 675 4054', '8179 Laurel Parkway', 'Over Rainbow');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('RGxs-464381', 'VWOv-225141445', '+54 958 380 1486', '26107 Mcguire Place', 'Pallet Town');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('ylpx-290411', 'unAw-053722056', '+86 968 908 1787', '6136 Cardinal Street', 'Mushroom Kingdom');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('OjzP-192290', 'njYe-609049276', '+216 836 236 9765', '475 Melby Road', 'Emory University');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('vqRn-592271', 'gBdC-272348696', '+63 150 562 9719', '81944 Onsgard Point', 'Itomori Square');
-INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('uyev-477440', 'ebGH-764302971', '+502 168 507 2788', '138 Jackson Alley', 'Neverland');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('mHLy-664734', 'fMGw-322686322', '68067329', '3646 Drewry Terrace', 'CapiLand');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('qojL-278179', 'iAgm-601168182', '47855818', '37 Sommers Road', 'Jurong East');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('PwNr-270848', 'Zfna-146983352', '39823684', '830 Rigney Drive', 'Clarke Quay');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('EFUI-983629', 'WCpV-011495875', '35092140', '6 Dayton Crossing', 'Mars');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('hwaA-126728', 'CquA-208726972', '36754054', '8179 Laurel Parkway', 'Over Rainbow');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('RGxs-464381', 'VWOv-225141445', '95381486', '26107 Mcguire Place', 'Pallet Town');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('ylpx-290411', 'unAw-053722056', '96891787', '6136 Cardinal Street', 'Mushroom Kingdom');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('OjzP-192290', 'njYe-609049276', '82369765', '475 Melby Road', 'Emory University');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('vqRn-592271', 'gBdC-272348696', '15059719', '81944 Onsgard Point', 'Itomori Square');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('uyev-477440', 'ebGH-764302971', '16502788', '138 Jackson Alley', 'Neverland');
 
 insert into Owners (uid, bid) values ('kyarnold0', 'mHLy-664734');
 insert into Owners (uid, bid) values ('csimione1', 'qojL-278179');
@@ -298,13 +302,66 @@ insert into Reserves (reserveId, timeStamp, guestCount) values ('bXQI9268', '201
 insert into Reserves (reserveId, timeStamp, guestCount) values ('xFZk2289', '2019-07-16 11:59:38', 5);
 insert into Reserves (reserveId, timeStamp, guestCount) values ('HlVb5951', '2019-06-29 08:24:08', 8);
 
-insert into Tables(tid, bid, reserveId) values ('a4','qojL-278179','pVMx8145');
-insert into Tables(tid, bid, reserveId) values ('a1','mHLy-664734','aCWK2009');
-insert into Tables(tid, bid, reserveId) values ('e4','PwNr-270848','DhFu9514');
-insert into Tables(tid, bid, reserveId) values ('a9','EFUI-983629','MXez1118');
-insert into Tables(tid, bid, reserveId) values ('n2','hwaA-126728','VUpH7740');
-insert into Tables(tid, bid, reserveId) values ('b4','uyev-477440','UTMh4236');
-insert into Tables(tid, bid, reserveId) values ('c3','RGxs-464381','qaWt9037');
-insert into Tables(tid, bid, reserveId) values ('z7','ylpx-290411','bXQI9268');
-insert into Tables(tid, bid, reserveId) values ('l4','OjzP-192290','xFZk2289');
-insert into Tables(tid, bid, reserveId) values ('c2','vqRn-592271','HlVb5951');
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('a4','qojL-278179','pVMx8145', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('a1','mHLy-664734','aCWK2009', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('e4','PwNr-270848','DhFu9514', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('a9','EFUI-983629','MXez1118', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('n2','hwaA-126728','VUpH7740', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('b4','uyev-477440','UTMh4236', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('c3','RGxs-464381','qaWt9037', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('z7','ylpx-290411','bXQI9268', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('l4','OjzP-192290','xFZk2289', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('c2','vqRn-592271','HlVb5951', '12PM', TRUE, 2);
+
+CREATE OR REPLACE FUNCTION branch_location_check()
+RETURNS TRIGGER AS 
+$$
+DECLARE count NUMERIC;
+BEGIN 
+    SELECT COUNT(*) into count 
+    FROM Branches B
+    WHERE NEW.rid = B.rid
+    AND NEW.location = B.location;
+    IF count > 0 THEN
+        RAISE NOTICE 'There is already a branch in that location!';
+        RETURN NULL;
+    ELSE
+        RETURN NEW;
+    END IF;
+END; 
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER branch_location_check
+BEFORE INSERT OR UPDATE ON Branches
+FOR EACH ROW
+EXECUTE PROCEDURE branch_location_check();
+
+CREATE OR REPLACE FUNCTION redeem_points_check()
+RETURNS TRIGGER AS
+$$
+DECLARE points_available NUMERIC;
+DECLARE points_needed NUMERIC;
+BEGIN
+    SELECT rewardPt INTO points_available
+    FROM Customers C
+    WHERE NEW.uid = C.uid;
+    SELECT value INTO points_needed
+    FROM Rewards R
+    Where R.iid = NEW.iid;
+    IF points_available >= points_needed THEN
+        Update Customers C1
+        SET rewardPt = points_available - points_needed
+        WHERE C1.uid = NEW.uid;
+        RETURN NEW;
+    ELSE
+        RAISE NOTICE 'Not enough points to redeem reward!';
+        RETURN NULL;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER redeem_points_check
+BEFORE INSERT OR UPDATE ON Choose
+FOR EACH ROW
+EXECUTE PROCEDURE redeem_points_check();
+
