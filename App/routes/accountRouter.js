@@ -52,9 +52,10 @@ router.all('/logout', checkLoggedIn, function(req,res,next){
 router.post('/signup', checkLoggedOut, function(req, res, next){
 
     pool.query(
-        "select 1 from accounts where email=$1;",[req.body.signupEmail],
+        "select 1 from users where email=$1;",[req.body.signupEmail],
         function(err,data){
             if(err){
+                console.log(err);
                 failRegister(req, res);
             } else{
 
@@ -67,21 +68,34 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
                     var addr = req.body.signupAddr;
                     var pNum = req.body.signupPNum;
 
-                    pool.query("INSERT INTO User VALUES" + "('" + uid + "','" + name + "','" + email + "," + password + ")", (err,data) => {
+                    pool.query("insert into Users (uid, name, email, password) values ($1, $2, $3, $4)",
+                    [uid,name,email,password],
+                    (err,data) => {
                         if (err) {
-                            return console.error('Error executing query', err.stack)
-                          }
-                        console.log(result.rows[0].name)
+                            console.error('Error executing query', err.stack);
+                        }
                     });
                     
                     var sql_query = ""; 
 
                     if (req.body.signupType === "Customer"){
-                        sql_query = "INSERT INTO Customer VALUES" + "('" + uid + "','" + addr + "','" + pNum + ", 0" +  + ")";
+                        console.log(addr);
+                        sql_query = "insert into Customers (uid, address, pNumber, rewardPt) values" + "('" + uid + "','" + addr + "','" + pNum + "',0" + ")";
 
                     }else if (req.body.signupType === "Owner"){
-                        sql_query = "INSERT INTO Owners VALUES" + "('" + uid + "','" + addr + "','" + pNum + ", 0" +  + ")";
+                        sql_query = "insert into Owners (uid, bid) values" + "('" + uid + "',null" + ")";
                     }
+
+                    pool.query(sql_query, (err,data) => {
+                        if (err){
+                            console.log(err); 
+                            console.log("error insert");
+                            failRegister(req,res);
+                            return; 
+                        }
+                        req.flash("success", "Account created. You may log in now.");
+                        res.redirect("/"); 
+                    });
 
                 }else {
                     req.flash("warning", "Account already exists, please login.")
