@@ -60,7 +60,7 @@ passport.serializeUser(function(user, cb) {
 
 passport.deserializeUser(function(user, cb) {
   pool.query(
-    "select uid, name, email, password from Users where uid=$1",
+    "select uid, name, email, password, isCustomer, isOwner from Users natural join accountTypes where uid=$1",
     [user],
     function(err, data) {
       cb(err, data.rows[0]);
@@ -73,7 +73,7 @@ const LocalStrategy = require("passport-local").Strategy;
 passport.use(
   "local", new LocalStrategy (function(email, password, done) {
     pool.query(
-      "select uid, name, email, password from Users where email=$1 and password = $2",
+      "select uid, name, email, password, isCustomer, isOwner from Users natural join accountTypes where email=$1 and password = $2",
       [email, password],
       function(err, data){
         if (err){

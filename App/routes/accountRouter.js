@@ -27,10 +27,10 @@ function makeid(name) {
     var digit = Math.floor(Math.random() * 11);
     
     return first.slice(0,1)+last+digit+"";
-  }
+}
 
 /* ---- Post Function for Login ---- */
-router.all('/login', checkLoggedOut,
+router.post('/login', checkLoggedOut,
 passport.authenticate("local", {
     failureRedirect: "/",
     failureFlash: true
@@ -46,7 +46,7 @@ router.all('/logout', checkLoggedIn, function(req,res,next){
     req.logout();
     req.flash("success", "You have been logged out!");
     res.redirect("/");
-})
+});
 
 /* ---- Post Function for Sign up ---- */
 router.post('/signup', checkLoggedOut, function(req, res, next){
@@ -105,7 +105,37 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
 
         }
     )
-})
+});
+
+/* ---- GET for profile ---- */
+router.get('/profile', checkLoggedIn, function(req, res, next){
+
+    var sql_query = "";
+
+    console.log(req.user);
+    console.log(req.user.iscustomer);
+
+    if (req.user.iscustomer){
+        sql_query = "select * from Users natural join Customers where Users.uid = " + "'" + req.user.uid +"'";
+    } else {
+        sql_query = "select * from Users natural join Owners where Users.uid = " + "'" + req.user.uid +"'";
+    }
+
+    pool.query(sql_query,(err,data) => {
+        if (err){
+            console.log(err);
+            return;
+        }
+        
+        res.render('account/profile', {
+
+            title: 'User Profile',
+            currentUser: req.user,
+            data: data.rows
+
+        });
+    })
+});
 
 module.exports = router;
 
