@@ -3,3 +3,4 @@
 App/bin
 App/env
 .gitignore
+App/node_modules
