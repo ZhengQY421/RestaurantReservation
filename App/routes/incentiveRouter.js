@@ -19,10 +19,10 @@ router.get('/', function(req, res, next) {
 });
 
 /* ---- GET for show discounts ---- */
-router.get('/', function(req, res, next) {
+router.get('/discount', function(req, res, next) {
     pool.query('SELECT * FROM Discounts', (err, data) => {
         console.log(err)
-        res.render('incentive/incentive', {
+        res.render('incentive/discount', {
             title: 'Discounts',
             data: data.rows,
             currentUser: req.user});
@@ -30,10 +30,10 @@ router.get('/', function(req, res, next) {
 });
 
 /* ---- GET for show prizes ---- */
-router.get('/', function(req, res, next) {
+router.get('/prize', function(req, res, next) {
     pool.query('SELECT * FROM Prizes', (err, data) => {
         console.log(err)
-        res.render('incentive/incentive', {
+        res.render('incentive/prize', {
             title: 'Prizes',
             data: data.rows,
             currentUser: req.user});
