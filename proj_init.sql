@@ -51,11 +51,11 @@ create table Branches (
 ALTER SEQUENCE branches_bid_seq restart with 1000000000;
 
 CREATE OR REPLACE FUNCTION branch_location_check()
-RETURNS TRIGGER AS 
+RETURNS TRIGGER AS
 $$
 DECLARE count NUMERIC;
-BEGIN 
-    SELECT COUNT(*) into count 
+BEGIN
+    SELECT COUNT(*) into count
     FROM Branches B
     WHERE NEW.rid = B.rid
     AND NEW.address = B.address;
@@ -65,7 +65,7 @@ BEGIN
     ELSE
         RETURN NEW;
     END IF;
-END; 
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER branch_location_check
@@ -76,7 +76,7 @@ EXECUTE PROCEDURE branch_location_check();
 create table Owners (
     uid             INT,
     bid             INT,
-    primary key (bid), --Changed from (uid, bid) to (bid) because 
+    primary key (bid), --Changed from (uid, bid) to (bid) because
                        --each restaurant branch should only have one owner!
     foreign key (uid) references Users (uid) on delete cascade,
     foreign key (bid) references Branches (bid) on delete cascade
@@ -181,16 +181,16 @@ create table Response (
 );
 
 CREATE OR REPLACE FUNCTION ratings_review_check()
-RETURNS TRIGGER AS 
+RETURNS TRIGGER AS
 $$
-BEGIN 
+BEGIN
     IF NEW.score IS NULL AND NEW.review IS NULL THEN
         RAISE NOTICE 'Invalid!';
         RETURN NULL;
     ELSE
         RETURN NEW;
     END IF;
-END; 
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ratings_review_check
