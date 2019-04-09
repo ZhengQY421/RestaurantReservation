@@ -19,13 +19,13 @@ function failRegister(req, res) {
 }
 
 function makeid(name) {
-    
-    var loc = name.indexOf(" "); 
+
+    var loc = name.indexOf(" ");
     var first = name.slice(0,loc).toLowerCase();
     var last = name.slice(loc+1).toLowerCase();
     last.replace(" ", "");
     var digit = Math.floor(Math.random() * 11);
-    
+
     return first.slice(0,1)+last+digit+"";
   }
 
@@ -64,7 +64,7 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
                     var name = req.body.signupName;
                     var email = req.body.signupEmail;
                     var password = req.body.signupPassword;
-                    var uid = makeid(name);  
+                    var uid = makeid(name);
                     var addr = req.body.signupAddr;
                     var pNum = req.body.signupPNum;
 
@@ -75,8 +75,8 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
                             console.error('Error executing query', err.stack);
                         }
                     });
-                    
-                    var sql_query = ""; 
+
+                    var sql_query = "";
 
                     if (req.body.signupType === "Customer"){
                         console.log(addr);
@@ -88,13 +88,13 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
 
                     pool.query(sql_query, (err,data) => {
                         if (err){
-                            console.log(err); 
+                            console.log(err);
                             console.log("error insert");
                             failRegister(req,res);
-                            return; 
+                            return;
                         }
                         req.flash("success", "Account created. You may log in now.");
-                        res.redirect("/"); 
+                        res.redirect("/");
                     });
 
                 }else {

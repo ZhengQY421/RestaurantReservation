@@ -22,7 +22,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var restaurantRouter = require("./routes/restaurantRouter");
 var accountRouter = require("./routes/accountRouter");
-var rewardRouter = require("./routes/rewardRouter");
+var incentiveRouter = require("./routes/incentiveRouter");
 
 var app = express();
 
@@ -93,7 +93,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/restaurant", restaurantRouter);
 app.use("/account", accountRouter);
-app.use("/reward", rewardRouter);
+app.use("/incentive", incentiveRouter);
 
 /* ---- Getting the local user ---- */
 app.use(function(req,res,next){
