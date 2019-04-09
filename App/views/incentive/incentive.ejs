@@ -4,6 +4,7 @@
         <!-- Header inclusion-->
         <%- include ../template/header.ejs %>
     </head>
+
     <body class="bg">
 
         <%- include ../template/navbar.ejs %>
@@ -11,16 +12,35 @@
 
         <br \>
         <h1 class="hd" style="font-size: 3em;" ><%= title %></h1>
+
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button"     data-toggle="dropdown">Reward Types
+             <span class="caret"></span></button>
+             <ul class="dropdown-menu">
+                <li><a href="/">Discounts</a></li>
+                <li><a href="/">Prizes</a></li>
+            </ul>
+        </div>
+
+
         <br \>
+
         <% for(var i =0; i<data.length; i++) { %>
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><%= data[i].iid%></h5>
+
+                        <div class="d-flex justify-content-between">
+                                <h5 class="card-title"><%= data[i].iid%></h5>
+                                <a href="#" class="btn btn-primary">Buy!</a>
+                        </div>
+
                     </div>
+
                 </div>
-                <br \>
+        <br \>
         <%} %>
 
 
         </body>
 </html>
+
