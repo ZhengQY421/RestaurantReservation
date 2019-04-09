@@ -227,6 +227,14 @@ create table Tables (
     FOREIGN KEY (bid) references Branches (bid)
 );
 
+create or replace view accountTypes (uid, isCustomer, isOwner) as
+select
+uid,
+coalesce((select true from Customers C where C.uid = U.uid), false),
+coalesce((select true from (select distinct uid from Owners O) as A where A.uid = U.uid), false)
+from Users U
+;
+
 INSERT INTO Users(name, email, password) VALUES ('Oliver Zheng', 'oliver@gmail.com', 'password');
 INSERT INTO Users(name, email, password) VALUES ('Edenuis Lua', 'edenuis@yahoo.com.sg', 'password1');
 INSERT INTO Users(name, email, password) VALUES ('Adrianna Fu', 'adrianna@outlook.com', 'password2');

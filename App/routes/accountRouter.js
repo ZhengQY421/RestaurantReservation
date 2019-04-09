@@ -64,45 +64,43 @@ router.post('/signup', checkLoggedOut, function(req, res, next){
                     var name = req.body.signupName;
                     var email = req.body.signupEmail;
                     var password = req.body.signupPassword;
-                    var uid = makeid(name);
                     var addr = req.body.signupAddr;
                     var pNum = req.body.signupPNum;
 
-                    pool.query("insert into Users (uid, name, email, password) values ($1, $2, $3, $4)",
-                    [uid,name,email,password],
-                    (err,data) => {
+                    pool.query("insert into Users (name, email, password) values ($1, $2, $3)",
+                    [name,email,password],
+                    function(err,data){
                         if (err) {
                             console.error('Error executing query', err.stack);
+                        } else {
+                            var sql_query = "";
+
+                            if (req.body.signupType === "Customer"){
+                                console.log(addr);
+                                sql_query = "INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '" + addr +"','" + pNum + "', 0 " + "from Users U where U.name=" + "'" +name +"';"
+                                
+                            
+                            }else if (req.body.signupType === "Owner"){
+                                sql_query = "INSERT INTO Owners(uid, bid) select U.uid,null from Users U where U.name=" + "'" +name +"';";
+                            }
+        
+                            pool.query(sql_query, (err,data) => {
+                                if (err){
+                                    console.log(err);
+                                    console.log("error insert");
+                                    failRegister(req,res);
+                                    return;
+                                }
+                                req.flash("success", "Account created. You may log in now.");
+                                res.redirect("/");
+                            });
                         }
                     });
-
-                    var sql_query = "";
-
-                    if (req.body.signupType === "Customer"){
-                        console.log(addr);
-                        sql_query = "insert into Customers (uid, address, pNumber, rewardPt) values" + "('" + uid + "','" + addr + "','" + pNum + "',0" + ")";
-
-                    }else if (req.body.signupType === "Owner"){
-                        sql_query = "insert into Owners (uid, bid) values" + "('" + uid + "',null" + ")";
-                    }
-
-                    pool.query(sql_query, (err,data) => {
-                        if (err){
-                            console.log(err);
-                            console.log("error insert");
-                            failRegister(req,res);
-                            return;
-                        }
-                        req.flash("success", "Account created. You may log in now.");
-                        res.redirect("/");
-                    });
-
                 }else {
                     req.flash("warning", "Account already exists, please login.")
                     res.redirect("/")
                 }
             }
-
         }
     )
 });
