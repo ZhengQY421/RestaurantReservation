@@ -18,6 +18,17 @@ function failRegister(req, res) {
     res.redirect("/");
 }
 
+function makeid(name) {
+    
+    var loc = name.indexOf(" "); 
+    var first = name.slice(0,loc).toLowerCase();
+    var last = name.slice(loc+1).toLowerCase();
+    last.replace(" ", "");
+    var digit = Math.floor(Math.random() * 11);
+    
+    return first.slice(0,1)+last+digit+"";
+  }
+
 /* ---- Post Function for Login ---- */
 router.all('/login', checkLoggedOut,
 passport.authenticate("local", {
@@ -41,8 +52,56 @@ router.all('/logout', checkLoggedIn, function(req,res,next){
 router.post('/signup', checkLoggedOut, function(req, res, next){
 
     pool.query(
-        "select 1 from accounts where email=$1;",[req.body.signupEmail],
+        "select 1 from users where email=$1;",[req.body.signupEmail],
         function(err,data){
+            if(err){
+                console.log(err);
+                failRegister(req, res);
+            } else{
+
+                if (data.rowCount === 0){
+
+                    var name = req.body.signupName;
+                    var email = req.body.signupEmail;
+                    var password = req.body.signupPassword;
+                    var uid = makeid(name);  
+                    var addr = req.body.signupAddr;
+                    var pNum = req.body.signupPNum;
+
+                    pool.query("insert into Users (uid, name, email, password) values ($1, $2, $3, $4)",
+                    [uid,name,email,password],
+                    (err,data) => {
+                        if (err) {
+                            console.error('Error executing query', err.stack);
+                        }
+                    });
+                    
+                    var sql_query = ""; 
+
+                    if (req.body.signupType === "Customer"){
+                        console.log(addr);
+                        sql_query = "insert into Customers (uid, address, pNumber, rewardPt) values" + "('" + uid + "','" + addr + "','" + pNum + "',0" + ")";
+
+                    }else if (req.body.signupType === "Owner"){
+                        sql_query = "insert into Owners (uid, bid) values" + "('" + uid + "',null" + ")";
+                    }
+
+                    pool.query(sql_query, (err,data) => {
+                        if (err){
+                            console.log(err); 
+                            console.log("error insert");
+                            failRegister(req,res);
+                            return; 
+                        }
+                        req.flash("success", "Account created. You may log in now.");
+                        res.redirect("/"); 
+                    });
+
+                }else {
+                    req.flash("warning", "Account already exists, please login.")
+                    res.redirect("/")
+                }
+            }
 
         }
     )
