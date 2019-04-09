@@ -21,7 +21,7 @@
              <ul class="dropdown-menu">
                 <li><a href="/incentive">All</a></li>
                 <li><a href="/incentive/discount">Discounts</a></li>
-                <li><a href="/">Prizes</a></li>
+                <li><a href="/incentive/prize">Prizes</a></li>
 
             </ul>
 
@@ -31,12 +31,21 @@
 
         <% for(var i =0; i<data.length; i++) { %>
                 <div class="card">
+
+                    <div class="card-header">
+                            <h5 class="card-title"><%= data[i].incentivename%></h5>
+                    </div>
+
                     <div class="card-body">
 
                         <div class="d-flex justify-content-between">
-                                <h5 class="card-title"><%= data[i].iid%></h5>
-                                <a href="#" class="btn btn-primary">Buy!</a>
+                                <h6 class="card-title">Description here~</h6>
+                                <!-- supposed to be description but uhhhhhHHHHh lol might need to change some stuff -->
+                                <a href="#" class="btn btn-primary">Redeem!</a>
                         </div>
+
+                        <h6 class="card-subtitle mb-2 text-muted">___ Points</h6>
+
 
                     </div>
 
@@ -47,4 +56,3 @@
 
         </body>
 </html>
-

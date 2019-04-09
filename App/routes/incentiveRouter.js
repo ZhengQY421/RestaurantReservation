@@ -20,7 +20,7 @@ router.get('/', function(req, res, next) {
 
 /* ---- GET for show discounts ---- */
 router.get('/discount', function(req, res, next) {
-    pool.query('SELECT * FROM Discounts', (err, data) => {
+    pool.query('SELECT * FROM Discounts natural join Incentives', (err, data) => {
         console.log(err)
         res.render('incentive/discount', {
             title: 'Discounts',
@@ -31,7 +31,7 @@ router.get('/discount', function(req, res, next) {
 
 /* ---- GET for show prizes ---- */
 router.get('/prize', function(req, res, next) {
-    pool.query('SELECT * FROM Prizes', (err, data) => {
+    pool.query('SELECT * FROM Prizes natural join Incentives', (err, data) => {
         console.log(err)
         res.render('incentive/prize', {
             title: 'Prizes',
