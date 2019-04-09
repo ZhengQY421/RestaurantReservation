@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS Owners CASCADE;
 DROP TABLE IF EXISTS Ratings CASCADE;
 DROP TABLE IF EXISTS Incentives CASCADE;
 DROP TABLE IF EXISTS Discounts CASCADE;
-DROP TABLE IF EXISTS Prizes CASCADE;
+DROP TABLE IF EXISTS Rewards CASCADE;
 DROP TABLE IF EXISTS Choose CASCADE;
 DROP TABLE IF EXISTS Gives CASCADE;
 DROP TABLE IF EXISTS Response CASCADE;
@@ -15,104 +15,338 @@ DROP TABLE IF EXISTS Reserves CASCADE;
 DROP TABLE IF EXISTS Photos CASCADE;
 
 create table Users (
-    uid             SERIAL,
-    name            VARCHAR(50) NOT NULL,
+    uid             VARCHAR(50),
+    name            VARCHAR(50),
     email           VARCHAR(50) UNIQUE,
-    password        VARCHAR(50) NOT NULL,
+    password        VARCHAR(50),
     primary key (uid)
 );
 
+-- may need another specific cid ... for uniquely identifying ?? may
+-- not be a good idea to have foreign key as primary key bc that means
+-- one to one relationship !!:////
+-- https://stackoverflow.com/questions/10982992/is-it-fine-to-have-foreign-key-as-primary-key
 create table Customers (
-    uid             INT NOT NULL,
+    uid             VARCHAR(50),
     address         VARCHAR(50),
-    pNumber         CHAR(8) NOT NULL UNIQUE,
-    rewardPt        INT CHECK (rewardPt >= 0),
-    foreign key (uid) references Users(uid) on delete cascade
+    pNumber         VARCHAR(8),
+    rewardPt        INT,
+    foreign key (uid) references Users on delete cascade
 );
 
+-- maybe should include price range, in dollar signs! ($ is cheap, $$$$ is expensive)
 create table Restaurants (
-    rid             SERIAL,
+    rid             VARCHAR(50),
     name            TEXT,
     type            TEXT,
     description     TEXT,
     primary key (rid)
 );
-ALTER SEQUENCE restaurants_rid_seq restart with 1000000;
 
+--this is ok, doesn't imply one to one relationship
 create table Branches (
-    bid             SERIAL,
-    rid             INT,
-    pNumber         CHAR(8) UNIQUE,
-    address         VARCHAR(100),
+    bid             VARCHAR(50),
+    rid             VARCHAR(50),
+    pNumber         VARCHAR(8),
+    address         VARCHAR(50),
     location        TEXT,
     primary key (bid),
     foreign key (rid) references Restaurants (rid) on delete cascade
 );
-ALTER SEQUENCE branches_bid_seq restart with 1000000000;
+
+create table Owners (
+    uid             VARCHAR(50),
+    bid             VARCHAR(50) UNIQUE,
+    primary key (uid),
+    foreign key (uid) references Users (uid) on delete cascade,
+    foreign key (bid) references Branches (bid) on delete cascade
+);
+
+create table Ratings (
+    rtid            VARCHAR(50),
+    uid             VARCHAR(50),
+    score           INT,
+    review          TEXT,
+    primary key (rtid),
+    foreign key (uid) references Users (uid) on delete cascade
+);
+
+CREATE TABLE Incentives (
+    iid             VARCHAR(20),
+    primary key (iid)
+);
+
+-- shouldn't this be a discount to a specific restaurant????? idk mayb just me
+-- but i think should have rid or bid also, not just some random voucher
+-- same issue as above... foreign key should prob not be primary key
+CREATE TABLE Discounts (
+    iid             VARCHAR(20),
+    percent         INT check(percent > 0 and percent <= 100),
+    PRIMARY KEY (iid),
+    FOREIGN KEY (iid) REFERENCES Incentives (iid) on delete cascade
+);
+
+-- same issue as above... foreign key should prob not be primary key
+CREATE TABLE Rewards (
+    iid             VARCHAR(20),
+    rewardName      TEXT,
+    value           INT check(value > 0),
+    PRIMARY KEY (iid),
+    FOREIGN KEY (iid) REFERENCES Incentives (iid) on delete cascade
+);
+
+create table Choose (
+    timeStamp       TIMESTAMPTZ,
+    uid             VARCHAR(50),
+    iid             VARCHAR(20),
+    foreign key (uid) references Users (uid) on delete cascade,
+    foreign key (iid) references Incentives (iid) on delete cascade
+);
+
+create table Gives  (
+    timeStamp       TIMESTAMPTZ,
+    uid             VARCHAR(50),
+    rtid            VARCHAR(50),
+    bid             VARCHAR(50),
+    foreign key (rtid) references Ratings (rtid) on delete cascade,
+    foreign key (uid) references Users (uid) on delete cascade,
+    foreign key (bid) references Branches (bid) on delete cascade
+);
+
+create table Response (
+    timeStamp       TIMESTAMPTZ,
+    rtid            VARCHAR(50),
+    bid             VARCHAR(50),
+    textResponse    TEXT
+
+);
+
+CREATE TABLE  Photos (
+    rid             VARCHAR(50),
+    pid             VARCHAR(50),
+    caption         TEXT,
+    file            TEXT,
+    PRIMARY KEY (pid),
+    FOREIGN KEY (rid) references Restaurants on delete cascade
+);
+
+create table Reserves (
+    reserveId       VARCHAR(50),
+    timeStamp       TIMESTAMPTZ,
+    guestCount      INT CHECK(guestCount > 0)
+);
+
+create table Tables (
+    tid             VARCHAR(20),
+    bid             VARCHAR(50),
+    reserveId       VARCHAR(50),
+    time            VARCHAR(4),
+    vacant          BOOLEAN,
+    seats           INT CHECK(seats > 0),
+    PRIMARY KEY (tid, time)
+);
+
+insert into Users (uid, name, email, password) values ('kyarnold0', 'Kelci Yarnold', 'kyarnold0@pen.io', 'LokKcX');
+insert into Users (uid, name, email, password) values ('csimione1', 'Coop Simione', 'csimione1@tripadvisor.com', 'xlYYRemeZle');
+insert into Users (uid, name, email, password) values ('aormes2', 'Audrey Ormes', 'aormes2@joomla.org', 'wBJ9Sjbn1h0s');
+insert into Users (uid, name, email, password) values ('sducarme3', 'Salaidh ducarme', 'sducarme3@miitbeian.gov.cn', 'Y6l0O14p');
+insert into Users (uid, name, email, password) values ('hdanell4', 'Hatty Danell', 'hdanell4@parallels.com', 'IJL9bMTgjaO');
+insert into Users (uid, name, email, password) values ('bbrafferton5', 'Britta Brafferton', 'bbrafferton5@ft.com', 'kDjWqwWbF');
+insert into Users (uid, name, email, password) values ('dde6', 'Darleen De Angelis', 'dde6@altervista.org', 'f8p41A');
+insert into Users (uid, name, email, password) values ('bconant7', 'Boigie Conant', 'bconant7@cnn.com', 'XsRzBxO');
+insert into Users (uid, name, email, password) values ('aindruch8', 'Abra Indruch', 'aindruch8@wix.com', 'ziGUWE1s7C');
+insert into Users (uid, name, email, password) values ('tschermick9', 'Tammie Schermick', 'tschermick9@phoca.cz', 'idoXUol6Lu');
+insert into Users (uid, name, email, password) values ('pikachu1', 'Oliver Zheng', 'a@b.com', '123456');
+insert into Users (uid, name, email, password) values ('cgallanders0', 'Clarine Gallanders', 'cgallanders0@51.la', 'Bt7XSuPxkKQn');
+insert into Users (uid, name, email, password) values ('greynault1', 'Gage Reynault', 'greynault1@photobucket.com', 'PkHLDGnRgw');
+insert into Users (uid, name, email, password) values ('gwitard2', 'Gradey Witard', 'gwitard2@macromedia.com', 'vuXSMsO');
+insert into Users (uid, name, email, password) values ('ddawtre3', 'Darrick Dawtre', 'ddawtre3@illinois.edu', 'MXw2Yuk4OFvy');
+insert into Users (uid, name, email, password) values ('hraffan4', 'Hamil Raffan', 'hraffan4@mashable.com', 'L1wVrK');
+insert into Users (uid, name, email, password) values ('emcclaughlin5', 'Eldredge McClaughlin', 'emcclaughlin5@w3.org', 'jK6H8C');
+insert into Users (uid, name, email, password) values ('tbonde6', 'Thedric Bonde', 'tbonde6@foxnews.com', 'oDWLku2vsl8O');
+insert into Users (uid, name, email, password) values ('ebigly7', 'Edward Bigly', 'ebigly7@g.co', 'vPG7fSuIdXX');
+insert into Users (uid, name, email, password) values ('hwalduck8', 'Hatti Walduck', 'hwalduck8@google.es', 'ysYrpWR');
+insert into Users (uid, name, email, password) values ('vlangeren9', 'Vernen Langeren', 'vlangeren9@boston.com', 'niITux2mVLlV');
+
+
+insert into Customers (uid, address, pNumber, rewardPt) values ('csimione1','7 Waywood Alley', '40422394', 90);
+insert into Customers (uid, address, pNumber, rewardPt) values ('aormes2', '4915 Utah Drive', '93878351', 25);
+insert into Customers (uid, address, pNumber, rewardPt) values ('kyarnold0','37529 8th Park', '22994095', 13);
+insert into Customers (uid, address, pNumber, rewardPt) values ('sducarme3','6 Clove Drive', '53193985', 6);
+insert into Customers (uid, address, pNumber, rewardPt) values ('hdanell4','834 Hollow Ridge Park', '37475346', 54);
+insert into Customers (uid, address, pNumber, rewardPt) values ('bbrafferton5','45 Cambridge Parkway', '07316897', 99);
+insert into Customers (uid, address, pNumber, rewardPt) values ('dde6','82 Brickson Park Alley', '20580589', 2);
+insert into Customers (uid, address, pNumber, rewardPt) values ('bconant7','6386 Waxwing Street', '21713117', 32);
+insert into Customers (uid, address, pNumber, rewardPt) values ('aindruch8','0 Holy Cross Plaza', '45645255', 6);
+insert into Customers (uid, address, pNumber, rewardPt) values ('tschermick9','3274 Butterfield Terrace', '28171768', 17);
+insert into Customers (uid, address, pNumber, rewardPt) values ('pikachu1','5 Olive Town', '18281712', 100);
+
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('fMGw-322686322', 'Lo Scoglio', 'Italian', 'Pellentesque ultrices mattis odio.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('iAgm-601168182', 'La Mesa', 'Carribean', 'Proin interdum mauris non ligula pellentesque ultrices.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('Zfna-146983352', 'El Toro', 'Carribean', 'Quisque ut erat.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('WCpV-011495875', 'Apollo Greek Taverna', 'Greek', 'Nulla tellus.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('CquA-208726972', 'Komi', 'Greek', 'Suspendisse ornare consequat lectus.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('VWOv-225141445', 'Mrs.Greek', 'Greek', 'Phasellus sit amet erat.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('unAw-053722056', 'Pastaciutta', 'Italian', 'Morbi vestibulum, velit id pretium iaculis, diam erat fermentum justo, nec condimentum neque sapien placerat ante.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('njYe-609049276', 'Falafel King', 'Mediterranean', 'Proin leo odio, porttitor id, consequat in, consequat ut, nulla.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('gBdC-272348696', 'Ramen-ya', 'Japanese', 'Nullam sit amet turpis elementum ligula vehicula consequat.');
+INSERT INTO Restaurants (rid, name, type, description) VALUES ('ebGH-764302971', 'El Mejillón', 'Carribean', 'Vestibulum rutrum rutrum neque.');
+
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('mHLy-664734', 'fMGw-322686322', '68067329', '3646 Drewry Terrace', 'CapiLand');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('qojL-278179', 'iAgm-601168182', '47855818', '37 Sommers Road', 'Jurong East');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('PwNr-270848', 'Zfna-146983352', '39823684', '830 Rigney Drive', 'Clarke Quay');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('EFUI-983629', 'WCpV-011495875', '35092140', '6 Dayton Crossing', 'Mars');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('hwaA-126728', 'CquA-208726972', '36754054', '8179 Laurel Parkway', 'Over Rainbow');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('RGxs-464381', 'VWOv-225141445', '95381486', '26107 Mcguire Place', 'Pallet Town');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('ylpx-290411', 'unAw-053722056', '96891787', '6136 Cardinal Street', 'Mushroom Kingdom');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('OjzP-192290', 'njYe-609049276', '82369765', '475 Melby Road', 'Emory University');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('vqRn-592271', 'gBdC-272348696', '15059719', '81944 Onsgard Point', 'Itomori Square');
+INSERT INTO Branches (bid, rid, pNumber, address, location) VALUES ('uyev-477440', 'ebGH-764302971', '16502788', '138 Jackson Alley', 'Neverland');
+
+insert into Owners (uid, bid) values ('cgallanders0', 'mHLy-664734');
+insert into Owners (uid, bid) values ('greynault1', 'qojL-278179');
+insert into Owners (uid, bid) values ('gwitard2', 'uyev-477440');
+insert into Owners (uid, bid) values ('ddawtre3', 'EFUI-983629');
+insert into Owners (uid, bid) values ('hraffan4', 'RGxs-464381');
+insert into Owners (uid, bid) values ('emcclaughlin5', 'hwaA-126728');
+insert into Owners (uid, bid) values ('tbonde6', 'vqRn-592271');
+insert into Owners (uid, bid) values ('ebigly7', 'PwNr-270848');
+insert into Owners (uid, bid) values ('hwalduck8', 'ylpx-290411');
+insert into Owners (uid, bid) values ('vlangeren9', 'OjzP-192290');
+
+
+insert into Ratings (rtid, uid, score, review) values ('Mbxw1905', 'kyarnold0', 5, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu, adipiscing molestie, hendrerit at, vulputate vitae, nisl.');
+insert into Ratings (rtid, uid, score, review) values ('Cejl0089', 'csimione1', 10, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.');
+insert into Ratings (rtid, uid, score, review) values ('Hyjz3444', 'aormes2', 3, 'Donec semper sapien a libero. Nam dui. Proin leo odio, porttitor id, consequat in, consequat ut, nulla.');
+insert into Ratings (rtid, uid, score, review) values ('iXQd9925', 'sducarme3', 3, 'Duis aliquam convallis nunc.');
+insert into Ratings (rtid, uid, score, review) values ('mJCE6787', 'hdanell4', 3, 'Vestibulum quam sapien, varius ut, blandit non, interdum in, ante. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Duis faucibus accumsan odio. Curabitur convallis. Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor. Morbi vel lectus in quam fringilla rhoncus. Mauris enim leo, rhoncus sed, vestibulum sit amet, cursus id, turpis. Integer aliquet, massa id lobortis convallis, tortor risus dapibus augue, vel accumsan tellus nisi eu orci.');
+insert into Ratings (rtid, uid, score, review) values ('EaTB0221', 'bbrafferton5', 5, 'Nullam varius. Nulla facilisi. Cras non velit nec nisi vulputate nonummy. Maecenas tincidunt lacus at velit.');
+insert into Ratings (rtid, uid, score, review) values ('Sinw9859', 'dde6', 1, 'Phasellus in felis.');
+insert into Ratings (rtid, uid, score, review) values ('QmOF6968', 'bconant7', 2, 'Ut tellus.');
+insert into Ratings (rtid, uid, score, review) values ('erTf2631', 'aindruch8', 7, 'Praesent id massa id nisl venenatis lacinia. Aenean sit amet justo. Morbi ut odio. Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.');
+insert into Ratings (rtid, uid, score, review) values ('sgqX4398', 'tschermick9', 4, 'Duis mattis egestas metus. Aenean fermentum.');
+
+INSERT INTO Incentives (iid) VALUES ('875-378-173');
+INSERT INTO Incentives (iid) VALUES ('307-527-634');
+INSERT INTO Incentives (iid) VALUES ('680-546-784');
+INSERT INTO Incentives (iid) VALUES ('404-334-039');
+INSERT INTO Incentives (iid) VALUES ('910-678-546');
+INSERT INTO Incentives (iid) VALUES ('180-446-808');
+INSERT INTO Incentives (iid) VALUES ('423-043-204');
+INSERT INTO Incentives (iid) VALUES ('148-256-043');
+INSERT INTO Incentives (iid) VALUES ('551-045-818');
+INSERT INTO Incentives (iid) VALUES ('177-510-070');
+
+INSERT INTO Discounts (iid, percent) VALUES ('875-378-173', 50);
+INSERT INTO Discounts (iid, percent) VALUES ('307-527-634', 60);
+INSERT INTO Discounts (iid, percent) VALUES ('680-546-784', 80);
+INSERT INTO Discounts (iid, percent) VALUES ('404-334-039', 80);
+INSERT INTO Discounts (iid, percent) VALUES ('910-678-546', 60);
+INSERT INTO Discounts (iid, percent) VALUES ('177-510-070', 80);
+INSERT INTO Discounts (iid, percent) VALUES ('551-045-818', 40);
+INSERT INTO Discounts (iid, percent) VALUES ('148-256-043', 80);
+INSERT INTO Discounts (iid, percent) VALUES ('423-043-204', 80);
+INSERT INTO Discounts (iid, percent) VALUES ('180-446-808', 30);
+
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('875-378-173', 'bxqiyoozsv', 70);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('307-527-634', 'htmbayocaa', 85);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('680-546-784', 'ivcfzpdxmc', 37);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('404-334-039', 'twaniqtyfn', 45);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('910-678-546', 'zqtgtkcnai', 53);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('180-446-808', 'nfstzzzetz', 5);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('423-043-204', 'xadkaruenn', 52);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('148-256-043', 'yrrpbkdjgv', 87);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('551-045-818', 'mctrawlqfj', 62);
+INSERT INTO Rewards (iid, rewardName, value) VALUES ('177-510-070', 'zvaslgvabq', 67);
+
+insert into Choose (timeStamp, uid, iid) values ('2014-08-23 07:51:21', 'kyarnold0','875-378-173');
+insert into Choose (timeStamp, uid, iid) values ('2017-11-27 14:32:13', 'csimione1','307-527-634');
+insert into Choose (timeStamp, uid, iid) values ('2017-01-16 17:57:39', 'aormes2','680-546-784');
+insert into Choose (timeStamp, uid, iid) values ('2016-04-23 18:44:43', 'sducarme3','910-678-546');
+insert into Choose (timeStamp, uid, iid) values ('2016-12-04 07:13:22', 'hdanell4','180-446-808');
+insert into Choose (timeStamp, uid, iid) values ('2017-12-13 11:16:46', 'bbrafferton5','423-043-204');
+insert into Choose (timeStamp, uid, iid) values ('2014-07-31 06:42:44', 'dde6','148-256-043');
+insert into Choose (timeStamp, uid, iid) values ('2017-08-20 16:12:12','bconant7','551-045-818');
+insert into Choose (timeStamp, uid, iid) values ('2017-02-01 12:22:46','aindruch8','404-334-039');
+insert into Choose (timeStamp, uid, iid) values ('2017-11-30 00:38:00', 'tschermick9','177-510-070');
+
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-27 16:13:44','kyarnold0','Mbxw1905','mHLy-664734');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-19 08:47:04','csimione1','Cejl0089','qojL-278179');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-19 15:48:43','aormes2','Hyjz3444', 'PwNr-270848');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-22 02:28:28','sducarme3','iXQd9925','EFUI-983629');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-18 23:22:06','hdanell4','mJCE6787', 'hwaA-126728');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-24 06:21:24', 'bbrafferton5','EaTB0221', 'RGxs-464381');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-23 00:03:41','dde6','Sinw9859','ylpx-290411');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-26 11:59:26','bconant7','QmOF6968','OjzP-192290');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-27 00:28:58','aindruch8','erTf2631','vqRn-592271');
+insert into Gives (timeStamp, uid, rtid, bid) values ('2019-04-17 09:41:11', 'tschermick9','sgqX4398', 'uyev-477440');
+
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-19 08:47:04','Cejl0089','qojL-278179','Mauris sit amet eros. Suspendisse accumsan tortor quis turpis. Sed ante. Vivamus tortor.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-19 15:48:43','Hyjz3444', 'PwNr-270848','Mauris ullamcorper purus sit amet nulla. Quisque arcu libero, rutrum ac, lobortis vel, dapibus at, diam.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-22 02:28:28','iXQd9925','EFUI-983629','Nulla mollis molestie lorem. Quisque ut erat. Curabitur gravida nisi at nibh.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-18 23:22:06','mJCE6787','hwaA-126728','Vivamus vestibulum sagittis sapien. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Etiam vel augue.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-23 00:03:41','Sinw9859','ylpx-290411','Aenean lectus. Pellentesque eget nunc.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-26 11:59:26','QmOF6968','OjzP-192290','Curabitur convallis. Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-27 00:28:58','erTf2631','vqRn-592271','Vivamus vestibulum sagittis sapien. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Etiam vel augue. Vestibulum rutrum rutrum neque. Aenean auctor gravida sem.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-17 09:41:11','sgqX4398','uyev-477440','In hac habitasse platea dictumst. Maecenas ut massa quis augue luctus tincidunt.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-24 06:21:24','EaTB0221','RGxs-464381','Morbi vestibulum, velit id pretium iaculis, diam erat fermentum justo, nec condimentum neque sapien placerat ante. Nulla justo. Aliquam quis turpis eget elit sodales scelerisque. Mauris sit amet eros.');
+insert into Response (timeStamp, rtid, bid, textResponse) values ('2019-04-27 16:13:44','Mbxw1905','mHLy-664734','Duis ac nibh. Fusce lacus purus, aliquet at, feugiat non, pretium quis, lectus. Suspendisse potenti.');
+
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('fMGw-322686322', 'Eou-811351331-LrG', 'Re-engineered full-range methodology', 'http://dummyimage.com/174x108.png/dddddd/000000');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('iAgm-601168182', 'CsI-382818924-YgZ', 'Realigned fresh-thinking portal', 'http://dummyimage.com/246x118.bmp/ff4444/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('Zfna-146983352', 'rHh-945997725-MTQ', 'Team-oriented homogeneous hierarchy', 'http://dummyimage.com/151x131.png/cc0000/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('WCpV-011495875', 'Ihm-380887401-BDS', 'Focused heuristic utilisation', 'http://dummyimage.com/174x113.bmp/ff4444/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('CquA-208726972', 'uFi-105203583-TtL', 'Diverse incremental contingency', 'http://dummyimage.com/196x185.jpg/ff4444/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('VWOv-225141445', 'ZLp-957760797-clG', 'User-friendly clear-thinking support', 'http://dummyimage.com/234x219.png/ff4444/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('unAw-053722056', 'uBR-460594002-LYe', 'Re-engineered responsive encryption', 'http://dummyimage.com/135x237.jpg/5fa2dd/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('njYe-609049276', 'OMs-371828441-wjH', 'Fully-configurable actuating forecast', 'http://dummyimage.com/180x137.png/5fa2dd/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('gBdC-272348696', 'JRM-615790334-iRd', 'Multi-channelled homogeneous secured line', 'http://dummyimage.com/230x144.png/ff4444/ffffff');
+INSERT INTO Photos (rid, pid, caption, file) VALUES ('ebGH-764302971', 'riO-333182348-wDV', 'Centralized dedicated throughput', 'http://dummyimage.com/174x242.bmp/dddddd/000000');
+
+insert into Reserves (reserveId, timeStamp, guestCount) values ('aCWK2009', '2019-07-17 09:04:46', 3);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('pVMx8145', '2019-06-23 07:36:22', 9);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('DhFu9514', '2019-06-12 21:03:48', 5);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('MXez1118', '2019-08-20 22:51:20', 8);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('VUpH7740', '2019-08-31 14:17:15', 1);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('UTMh4236', '2019-05-25 09:30:13', 10);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('qaWt9037', '2019-07-09 23:47:37', 2);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('bXQI9268', '2019-06-11 03:58:46', 6);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('xFZk2289', '2019-07-16 11:59:38', 5);
+insert into Reserves (reserveId, timeStamp, guestCount) values ('HlVb5951', '2019-06-29 08:24:08', 8);
+
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('a4','qojL-278179','pVMx8145', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('a1','mHLy-664734','aCWK2009', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('e4','PwNr-270848','DhFu9514', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('a9','EFUI-983629','MXez1118', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('n2','hwaA-126728','VUpH7740', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('b4','uyev-477440','UTMh4236', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('c3','RGxs-464381','qaWt9037', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('z7','ylpx-290411','bXQI9268', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('l4','OjzP-192290','xFZk2289', '12PM', TRUE, 2);
+insert into Tables(tid, bid, reserveId, time, vacant, seats) values ('c2','vqRn-592271','HlVb5951', '12PM', TRUE, 2);
 
 CREATE OR REPLACE FUNCTION branch_location_check()
-RETURNS TRIGGER AS 
+RETURNS TRIGGER AS
 $$
 DECLARE count NUMERIC;
-BEGIN 
-    SELECT COUNT(*) into count 
+BEGIN
+    SELECT COUNT(*) into count
     FROM Branches B
     WHERE NEW.rid = B.rid
-    AND NEW.address = B.address;
+    AND NEW.location = B.location;
     IF count > 0 THEN
         RAISE NOTICE 'There is already a branch in that location!';
         RETURN NULL;
     ELSE
         RETURN NEW;
     END IF;
-END; 
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER branch_location_check
 BEFORE INSERT OR UPDATE ON Branches
 FOR EACH ROW
 EXECUTE PROCEDURE branch_location_check();
-
-create table Owners (
-    uid             INT,
-    bid             INT,
-    primary key (bid), --Changed from (uid, bid) to (bid) because 
-                       --each restaurant branch should only have one owner!
-    foreign key (uid) references Users (uid) on delete cascade,
-    foreign key (bid) references Branches (bid) on delete cascade
-);
-
-CREATE TABLE Incentives (
-    iid             SERIAL,
-    incentiveName   TEXT NOT NULL UNIQUE,
-    primary key (iid)
-);
-ALTER SEQUENCE incentives_iid_seq restart with 1000000;
-
-CREATE TABLE Discounts (
-    iid             INT,
-    description     TEXT,
-    percent         INT CHECK(percent > 0 and percent <= 100),
-    redeemPts       INT CHECK(redeemPts >= 0),
-    PRIMARY KEY (iid),
-    FOREIGN KEY (iid) REFERENCES Incentives (iid) on delete cascade
-);
-
-CREATE TABLE Prizes (
-    iid             INT,
-    description     TEXT,
-    redeemPts       INT CHECK(redeemPts > 0),
-    PRIMARY KEY (iid),
-    FOREIGN KEY (iid) REFERENCES Incentives (iid) on delete cascade
-);
-
-create table Choose (
-    timeStamp       TIMESTAMPTZ NOT NULL,
-    uid             INT NOT NULL,
-    iid             INT NOT NULL,
-    foreign key (uid) references Users (uid) on delete cascade,
-    foreign key (iid) references Incentives (iid) on delete cascade
-);
 
 CREATE OR REPLACE FUNCTION redeem_points_check()
 RETURNS TRIGGER AS
@@ -123,15 +357,9 @@ BEGIN
     SELECT rewardPt INTO points_available
     FROM Customers C
     WHERE NEW.uid = C.uid;
-    IF EXISTS(SELECT 1 FROM Discounts D where D.iid=NEW.iid) THEN
-        SELECT D1.redeemPts INTO points_needed
-        FROM Discounts D1
-        Where D1.iid = NEW.iid;
-    ELSE
-        SELECT P.redeemPts INTO points_needed
-        FROM Prizes P
-        Where P.iid = NEW.iid;
-    END IF;
+    SELECT value INTO points_needed
+    FROM Rewards R
+    Where R.iid = NEW.iid;
     IF points_available >= points_needed THEN
         Update Customers C1
         SET rewardPt = points_available - points_needed
@@ -149,1579 +377,3 @@ BEFORE INSERT OR UPDATE ON Choose
 FOR EACH ROW
 EXECUTE PROCEDURE redeem_points_check();
 
-create table Ratings (
-    rtid            SERIAL,
-    uid             INT NOT NULL,
-    score           NUMERIC (1) DEFAULT 0 CHECK(score > 0 and score <= 5),
-    review          TEXT,
-    PRIMARY KEY (rtid),
-    FOREIGN KEY (uid) references Users (uid) on delete cascade
-);
-ALTER SEQUENCE ratings_rtid_seq restart with 100000;
-
-create table Gives  (
-    timeStamp       TIMESTAMPTZ NOT NULL,
-    uid             INT,
-    rtid            INT,
-    bid             INT,
-    PRIMARY KEY(uid, rtid, bid),
-    FOREIGN KEY (rtid) references Ratings (rtid) on delete cascade,
-    FOREIGN KEY (uid) references Users (uid) on delete cascade,
-    FOREIGN KEY (bid) references Branches (bid) on delete cascade
-);
-
-create table Response (
-    timeStamp       TIMESTAMPTZ NOT NULL,
-    rtid            INT,
-    bid             INT,
-    textResponse    TEXT NOT NULL,
-    PRIMARY KEY(rtid, bid, timeStamp),
-    FOREIGN KEY (rtid) references Ratings(rtid) on delete cascade,
-    FOREIGN KEY (bid) references Branches(bid) on delete cascade
-);
-
-CREATE OR REPLACE FUNCTION ratings_review_check()
-RETURNS TRIGGER AS 
-$$
-BEGIN 
-    IF NEW.score IS NULL AND NEW.review IS NULL THEN
-        RAISE NOTICE 'Invalid!';
-        RETURN NULL;
-    ELSE
-        RETURN NEW;
-    END IF;
-END; 
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER ratings_review_check
-BEFORE INSERT OR UPDATE ON Ratings
-FOR EACH ROW
-EXECUTE PROCEDURE ratings_review_check();
-
-CREATE TABLE  Photos (
-    pid             SERIAL,
-    rid             INT NOT NULL,
-    caption         TEXT,
-    file            TEXT NOT NULL,
-    PRIMARY KEY (pid),
-    FOREIGN KEY (rid) references Restaurants on delete cascade
-);
-ALTER SEQUENCE photos_pid_seq restart with 10000000;
-
-create table Reserves (
-    reserveId       SERIAL,
-    timeStamp       TIMESTAMPTZ NOT NULL,
-    guestCount      INT NOT NULL CHECK(guestCount > 0),
-    PRIMARY KEY (reserveId)
-);
-
-create table Tables (
-    tid             SERIAL,
-    time            VARCHAR(4),
-    bid             INT NOT NULL,
-    reserveId       INT UNIQUE,
-    vacant          BOOLEAN NOT NULL,
-    seats           INT NOT NULL CHECK(seats > 0),
-    PRIMARY KEY (tid, time),
-    FOREIGN KEY (reserveId) references Reserves (reserveId),
-    FOREIGN KEY (bid) references Branches (bid)
-);
-
-INSERT INTO Users(name, email, password) VALUES ('Oliver Zheng', 'oliver@gmail.com', 'password');
-INSERT INTO Users(name, email, password) VALUES ('Edenuis Lua', 'edenuis@yahoo.com.sg', 'password1');
-INSERT INTO Users(name, email, password) VALUES ('Adrianna Fu', 'adrianna@outlook.com', 'password2');
-INSERT INTO Users(name, email, password) VALUES ('Tom Hardy', 'hardtom@gmail.com', 'password3');
-INSERT INTO Users(name, email, password) VALUES ('Jane Smooth', 'smoothiejanie@open.io', 'password4');
-INSERT INTO Users(name, email, password) VALUES ('Baby Max', 'Iamcute@tippy.com', 'password5');
-INSERT INTO Users(name, email, password) VALUES ('Captain America', 'avengersunited@ua.gov.sg', 'password6');
-INSERT INTO Users(name, email, password) VALUES ('Pikachu', 'zapthemall@pokemon.org', 'password7');
-INSERT INTO Users(name, email, password) VALUES ('Ash Ketchup', 'catchthemall@pokemon.org', 'password8');
-INSERT INTO Users(name, email, password) VALUES ('Kane Crook', 'crookedKane@bullock.com', 'password9');
-INSERT INTO Users(name, email, password) VALUES ('Green Broccoli', 'Iamdelicious@bullock.com', 'password10');
-INSERT INTO Users(name, email, password) VALUES ('May Fall', 'fallforme@gmail.com', 'password11');
-INSERT INTO Users(name, email, password) VALUES ('Arnold Schwarzenegger', 'Iwillbeback@terminator.org', 'password12');
-INSERT INTO Users(name, email, password) VALUES ('Bruise Wayne', 'thathurts@bw.com', 'password13');
-INSERT INTO Users(name, email, password) VALUES ('Sean Black', 'seanblack@yahoo.com.sg', 'password14');
-INSERT INTO Users(name, email, password) VALUES ('Groot', 'IAMGROOT@gog.edu.sg', 'password15');
-INSERT INTO Users(name, email, password) VALUES ('Olivia Fong', 'oliviafong@outlook.com', 'password16');
-INSERT INTO Users(name, email, password) VALUES ('Amelia Millie', 'milesaway@outlook.com', 'password17');
-INSERT INTO Users(name, email, password) VALUES ('Jack-Jack Parr', 'powerfuljack@incredibles.com.sg', 'password18');
-INSERT INTO Users(name, email, password) VALUES ('Violet Parr', 'ignorejackjack@incredibles.com.sg', 'password19');
-INSERT INTO Users(name, email, password) VALUES ('Dash Parr', 'ignoreviolet@incredibles.com.sg', 'password20');
-
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '28 Rippin Drive Lane SINGAPORE 970914', '95557797', 100 from Users U where U.name='Jack-Jack Parr';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '37 Jalan Huels Lane SINGAPORE 045488', '95556458', 120 from Users U where U.name='Violet Parr';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '52 Jalan Cummerata Hill SINGAPORE 598859', '85554272', 70 from Users U where U.name='Dash Parr';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 296C Greenfelder Park Walk SINGAPORE 403488', '85551368', 55 from Users U where U.name='Arnold Schwarzenegger';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '490 Jalan Rippin Alley SINGAPORE 986666', '95553200', 115 from Users U where U.name='Groot';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 555E Crona Road Grove SINGAPORE 632951', '85559123', 205 from Users U where U.name='Bruise Wayne';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 441A Jalan Oberbrunner Grove SINGAPORE 373484', '85554657', 350 from Users U where U.name='Baby Max';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 146D Farrell Place Park SINGAPORE 173569', '95559431', 75 from Users U where U.name='Captain America';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 965C Friesen Crescent Way SINGAPORE 706461', '95551651', 55 from Users U where U.name='Pikachu';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '376 Von Alley Park SINGAPORE 067166', '95554089', 165 from Users U where U.name='Ash Ketchup';
-
-INSERT INTO Restaurants(name, type, description) VALUES ('Putien', 'Casual Dining', 'Seafood, Singaporean, Chinese');
-INSERT INTO Restaurants(name, type, description) VALUES ('Itacho Sushi', 'Casual Dining', 'Sushi, Japanese');
-INSERT INTO Restaurants(name, type, description) VALUES ('Hai Di Lao Hot Pot', 'Casual Dining', 'Sichuan, Chinese, Seafood');
-INSERT INTO Restaurants(name, type, description) VALUES ('Paris Baguette Cafe', 'Cafe, Bakery', 'Cafe, Bakery');
-INSERT INTO Restaurants(name, type, description) VALUES ('Graffiti Cafe', 'Quick Bites', 'Cafe, Fast Food');
-INSERT INTO Restaurants(name, type, description) VALUES ('Bonchon', 'Casual Dining', 'Korean');
-INSERT INTO Restaurants(name, type, description) VALUES ('Pizza Maru', 'Casual Dining', 'Korean, Pizza');
-INSERT INTO Restaurants(name, type, description) VALUES ('Cali', 'Cafe', 'American, Bar, All-Day Breakfast, Cafe');
-INSERT INTO Restaurants(name, type, description) VALUES ('Hard Rock Cafe', 'Cafe', 'American, Bar, Burgers');
-INSERT INTO Restaurants(name, type, description) VALUES ('Brotzeit', 'Casual Dining', 'German, Bar');
-INSERT INTO Restaurants(name, type, description) VALUES ('Summer Hill', 'Cafe', 'French, Cafe');
-
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62956358', '127 Kitchener Road 208514', 'Kitchener Road, Kallang' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '65094296', '2 Orchard Turn, #04-12 ION Orchard 238801', 'Ion Orchard, Orchard' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66863781', '26 Sentosa Gateway, #01-203/204 The Forum 098138', 'Southern Islands' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63362184', '252 North Bridge Road, #02-18 Raffles City Shopping Centre 179103', 'Raffles City Shopping Centre, Downtown Core' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63456358', '80 Marine Parade Road, #02-13/13A Parkway Parade 449269', 'Parkway Parade, Marine Parade' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66347833', '23 Serangoon Central, #02-18/19 Nex 556083', 'Serangoon' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '67812162', '4 Tampines Central 5, #B1-27 Tampines Mall 529510', 'Tampines' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63769358', '1 Harbourfront Walk, #02-131/132 Vivo City 098585', 'Bukit Merah' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63364068', '6 Raffles Boulevard, #02-205 Marina Square 039594', 'Marina Square, Downtown Core' from Restaurants where name='Putien';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '67952338', '1 Jurong West Central 2, #02-34 JP1 648886', 'Jurong West' from Restaurants where name='Putien';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66844083', '2 Jurong East Central 1, #02-15 Jcube 609731', 'Jcube, Jurong East' from Restaurants where name='Itacho Sushi';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '65098911', '2 Orchard Turn, #B3-20 ION Orchard 238801', 'Ion Orchard, Orchard' from Restaurants where name='Itacho Sushi';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62418911', '65 Airport Boulevard, #03-30/31 Changi Airport Terminal 3 819663', 'Changi Airport Terminal 3' from Restaurants where name='Itacho Sushi';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63378911', '200 Victoria Street, #B1-05 Bugis Junction 188021', 'Downtown Core' from Restaurants where name='Itacho Sushi';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66940880', '1 Vista Exchange Green, #B1-12 The Star Vista 138617', 'The Star Vista, Queenstown' from Restaurants where name='Itacho Sushi';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, NULL, '4 Tampines Central 5, #04-32 Tampines Mall 529510', 'Tampines' from Restaurants where name='Itacho Sushi';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63378922', '68 Orchard Road #02-35 Plaza Singapura 238839', 'Plaza Singapura, Museum' from Restaurants where name='Itacho Sushi';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62278911', '311 New Upper Changi Road, #B2-42/43 Bedok Mall 467360', 'Bedok Mall, Bedok' from Restaurants where name='Itacho Sushi';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63378626', '3D River Valley Road, #02-04 Clarke Quay 179023', 'River Valley Road, Singapore River' from Restaurants where name='Hai Di Lao Hot Pot';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '68357227', '313 Orchard Road, #04-23/24 238895', 'Orchard Road, Orchard' from Restaurants where name='Hai Di Lao Hot Pot';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '68964111', '2 Jurong East Street 21, #03-01 IMM 609601', 'Toh Guan, Jurong East' from Restaurants where name='Hai Di Lao Hot Pot';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '68362010', '435 Orchard Road #02-48/53 Wisma Atria', 'Orchard' from Restaurants where name='Paris Baguette Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '65420386', '60 Airport Boulevard, #016-006 Changi Airport Terminal 2 819643', 'T2 Arrival Drive, Changi' from Restaurants where name='Paris Baguette Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '65570148', '1 Raffles Place, #B1-01 Raffles Place 048616', 'Church Street, Downtown Core' from Restaurants where name='Paris Baguette Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63367943', '200 Victoria Street, #B1-24/25 Bugis Junction 188021', 'Lorong Renjong, Downtown Core' from Restaurants where name='Paris Baguette Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '67347765', '50 Jurong Gateway Road, #02-20/21, Jurong East, Singapore 608549', 'Jem, Jurong East' from Restaurants where name='Paris Baguette Cafe';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, NULL, '50 Jurong Gateway Road, #05-02 Jem, 608549', 'Jem, Jurong East' from Restaurants where name='Graffiti Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62331896', '14 Scotts Road, #01-17/18/19 Far East Plaza, 228213', 'Far East Plaza, Orchard' from Restaurants where name='Graffiti Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66345909', '23 Serangoon Central, #B2-62 Nex, 556083', 'Serangoon' from Restaurants where name='Graffiti Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, NULL, '8 Grange Road, #B1-09 Cathay Cineleisure, 239695', 'Cathay Cineleisure Orchard, Orchard' from Restaurants where name='Graffiti Cafe';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66122131', '1 Sengkang Square, #01 - 14 / 15, Singapore 545078', 'Compass One, Serangoon' from Restaurants where name='Bonchon';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '68844768', '201 Victoria St, #01-11, Singapore 188067', 'Bugis+, Bugis' from Restaurants where name='Bonchon';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '65657990', '1 Northpoint Drive, #B1-180, Singapore 768019', 'Northpoint City, Yishun' from Restaurants where name='Bonchon';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66340930', 'Bugis+, 201 Victoria St, #04-03/04, 188067', 'Bugis+, Bugis' from Restaurants where name='Pizza Maru';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62544307', '930 Yishun Avenue 2 #B1-192/193, Singapore 769098', 'Northpoint City, Yishun' from Restaurants where name='Pizza Maru';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '66849897', '31 Rochester Drive, #01-01, Park Avenue Hotel, 138637', 'Park Avenue Hotel, Buona Vista' from Restaurants where name='Cali';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '64440590', '2 Changi Business Park Ave 1, Singapore 486015', 'Changi' from Restaurants where name='Cali';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62355232', '50 Cuscaden Rd, #02-01 Hpl House, Singapore 249724', 'Orchard' from Restaurants where name='Hard Rock Cafe';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '67957454', '26 Sentosa Gateway, Resorts World Sentosa, The Forum #01-209, 098138', 'Resorts World Sentosa' from Restaurants where name='Hard Rock Cafe';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '68831534', '252 North Bridge Rd, #01-17, Raffles City Shopping Centre, 179103', 'Raffles City Shopping Centre' from Restaurants where name='Brotzeit';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '63482040', '126 E Coast Rd, Singapore 428809', 'Katong' from Restaurants where name='Brotzeit';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '68344038', '313 Orchard Rd, # 01 - 27, Singapore 238895', '313@Somerset, Orchard Central' from Restaurants where name='Brotzeit';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62728815', '1 Harbourfront Walk, #01-149, VivoCity, 098585', 'VivoCity, Harborfront' from Restaurants where name='Brotzeit';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '64659874', '3 Gateway Dr, #01-04, Singapore 608532', 'Westgate' from Restaurants where name='Brotzeit';
-
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62515337', '106 Clementi Street 12, #01-62, Singapore 120106', 'Clementi' from Restaurants where name='Summer Hill';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62195936', '50 Hume Ave, Singapore 596229', 'Bukit Batok' from Restaurants where name='Summer Hill';
-
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Olivia Fong' and R.name='Putien';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Amelia Millie' and R.name='Summer Hill';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Sean Black' and R.name='Hard Rock Cafe';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='May Fall' and R.name='Graffiti Cafe';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Tom Hardy' and R.name='Cali';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Jane Smooth' and R.name='Paris Baguette Cafe';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Kane Crook' and R.name='Bonchon';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Green Broccoli' and R.name='Pizza Maru';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Oliver Zheng' and R.name='Brotzeit';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Edenuis Lua' and R.name='Hai Di Lao Hot Pot';
-INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Adrianna Fu' and R.name='Itacho Sushi';
-
-INSERT INTO Incentives (incentiveName) VALUES ('Putien 19th Year Anniversary!');
-INSERT INTO Incentives (incentiveName) VALUES ('Summer Promotion at Brotzeit');
-INSERT INTO Incentives (incentiveName) VALUES ('Itacho Sushi 10th Year Anniversary Special');
-INSERT INTO Incentives (incentiveName) VALUES ('Party away at Hard Rock Cafe this April!');
-INSERT INTO Incentives (incentiveName) VALUES ('Enjoy 1 for 1 Pizza at Pizza Maru');
-INSERT INTO Incentives (incentiveName) VALUES ('Spend time with your family @ Paris Baguette!');
-INSERT INTO Incentives (incentiveName) VALUES ('Leave your mark at Graffiti Cafe!');
-INSERT INTO Incentives (incentiveName) VALUES ('Haidilao dinner promotion');
-INSERT INTO Incentives (incentiveName) VALUES ('Its Summer time @ Summer Hill');
-INSERT INTO Incentives (incentiveName) VALUES ('Couples Promotion @ Cali');
-INSERT INTO Incentives (incentiveName) VALUES ('Spicy red hot wings @ Bonchon');
-
-INSERT INTO Incentives (incentiveName) VALUES ('All-inclusive Premium Set Lunch @ Putien');
-INSERT INTO Incentives (incentiveName) VALUES ('Haidilao All-day set meal');
-INSERT INTO Incentives (incentiveName) VALUES ('Bonchon: 6pcs wings for $5 nett!');
-INSERT INTO Incentives (incentiveName) VALUES ('MEGA PROMO at Paris Baguette Cafe');
-INSERT INTO Incentives (incentiveName) VALUES ('Giant teddy bear');
-INSERT INTO Incentives (incentiveName) VALUES ('Movie Tickets');
-INSERT INTO Incentives (incentiveName) VALUES ('Laptop Cover');
-INSERT INTO Incentives (incentiveName) VALUES ('Mini Note Book');
-INSERT INTO Incentives (incentiveName) VALUES ('Spill-Free Tumbler');
-INSERT INTO Incentives (incentiveName) VALUES ('Portable Charger');
-INSERT INTO Incentives (incentiveName) VALUES ('Couple Vacation Stay');
-
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Celebrate with us and enjoy 50% discount at all Putien Outlets from 12 April to 12 May!', 50, 0 from Incentives I where I.incentiveName='Putien 19th Year Anniversary!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Enjoy 20% off on all main course at Brotzeit this summer. Promotion is valid only from 1st April to 30th April.', 20, 50 from Incentives I where I.incentiveName='Summer Promotion at Brotzeit';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Enjoy 40% off at all Itacho Sushi outlets this April!', 40, 75 from Incentives I where I.incentiveName='Itacho Sushi 10th Year Anniversary Special';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'This April, Hard Rock Cafe will be hosting a 15% off on all main course from 12 April to 19 April! Time to party the heat away!', 15, 35 from Incentives I where I.incentiveName='Party away at Hard Rock Cafe this April!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Share a pizza with your loved ones this April!', 50, 80 from Incentives I where I.incentiveName='Enjoy 1 for 1 Pizza at Pizza Maru';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Spend some time with your family at Paris Baguette! 30% off on all items. Hurry down today!', 30, 75 from Incentives I where I.incentiveName='Spend time with your family @ Paris Baguette!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Leave your mark at Graffiti Cafe this April and enjoy a 10% discount on all main course items.', 10, 15 from Incentives I where I.incentiveName='Leave your mark at Graffiti Cafe!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Enjoy a 10% discount during dinner period at Hai Di Lao. Promotion is valid at all outlets.', 10, 30 from Incentives I where I.incentiveName='Haidilao dinner promotion';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Cool yourself down this summer at Summer Hill and enjoy 25% off on all items while you are there!', 25, 50 from Incentives I where I.incentiveName='Its Summer time @ Summer Hill';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Sweat it out with Bonchon Spicy Red Hot Wings! Enjoy 70% off on second meal ordered', 70, 45 from Incentives I where I.incentiveName='Spicy red hot wings @ Bonchon';
-
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Enjoy your lunch at Putien for only $20 Nett', 75 from Incentives I where I.incentiveName='All-inclusive Premium Set Lunch @ Putien';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, '$15 nett for all Haidilao All-day set meals. Valid only at selected outlets', 100 from Incentives I where I.incentiveName='Haidilao All-day set meal';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Delicious wings waiting for you!', 25 from Incentives I where I.incentiveName='Bonchon: 6pcs wings for $5 nett!';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, '$5 voucher for all pastries!', 25 from Incentives I where I.incentiveName='MEGA PROMO at Paris Baguette Cafe';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Donate this teddy bear to kid in need', 50 from Incentives I where I.incentiveName='Giant teddy bear';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'A pair of movie tickets to enjoy with your partner', 100 from Incentives I where I.incentiveName='Movie Tickets';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Perfect birthday gift', 250 from Incentives I where I.incentiveName='Jaguar Pen';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Record your travels with this mini note book', 20 from Incentives I where I.incentiveName='Mini Note Book';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'No more spills to worry about!', 200 from Incentives I where I.incentiveName='Spill-Free Tumbler';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, '18000mAh, 1kg', 150 from Incentives I where I.incentiveName='Portable Charger';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Enjoy a 2D1N vacation stay at Resort World Sentosa with your partner!', 500 from Incentives I where I.incentiveName='Couple Vacation Stay';
-
-insert into Choose (timeStamp, uid, iid) (select now()::timestamptz(0), (select U.uid from Users U where U.name='Jack-Jack Parr'), (select I.iid from Incentives I WHERE I.incentivename='Spicy red hot wings @ Bonchon'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Violet Parr'), (select I.iid from Incentives I WHERE I.incentivename='Giant teddy bear'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Dash Parr'), (select I.iid from Incentives I WHERE I.incentivename='Summer Promotion at Brotzeit'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Arnold Schwarzenegger'), (select I.iid from Incentives I WHERE I.incentivename='Mini Note Book'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Groot'), (select I.iid from Incentives I WHERE I.incentivename='Movie Tickets'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Bruise Wayne'), (select I.iid from Incentives I WHERE I.incentivename='Spill-Free Tumbler'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Baby Max'), (select I.iid from Incentives I WHERE I.incentivename='Portable Charger'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Captain America'), (select I.iid from Incentives I WHERE I.incentivename='Giant teddy bear'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Pikachu'), (select I.iid from Incentives I WHERE I.incentivename='Haidilao dinner promotion'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Ash Ketchup'), (select I.iid from Incentives I WHERE I.incentivename='Itacho Sushi 10th Year Anniversary Special'));
-
-INSERT INTO Ratings (uid, score, review) VALUES (21, 5, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu, adipiscing molestie, hendrerit at, vulputate vitae, nisl.');
-INSERT INTO Ratings (uid, score, review) VALUES (20, 5, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.');
-INSERT INTO Ratings (uid, score, review) VALUES (19, 3, 'Donec semper sapien a libero. Nam dui. Proin leo odio, porttitor id, consequat in, consequat ut, nulla.');
-INSERT INTO Ratings (uid, score, review) VALUES (13, 3, 'Duis aliquam convallis nunc.');
-INSERT INTO Ratings (uid, score, review) VALUES (16, 3, 'Vestibulum quam sapien, varius ut, blandit non, interdum in, ante. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Duis faucibus accumsan odio. Curabitur convallis. Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor. Morbi vel lectus in quam fringilla rhoncus. Mauris enim leo, rhoncus sed, vestibulum sit amet, cursus id, turpis. Integer aliquet, massa id lobortis convallis, tortor risus dapibus augue, vel accumsan tellus nisi eu orci.');
-INSERT INTO Ratings (uid, score, review) VALUES (6, 5, 'Nullam varius. Nulla facilisi. Cras non velit nec nisi vulputate nonummy. Maecenas tincidunt lacus at velit.');
-INSERT INTO Ratings (uid, score, review) VALUES (7, 1, 'Phasellus in felis.');
-INSERT INTO Ratings (uid, score, review) VALUES (8, 2, 'Ut tellus.');
-INSERT INTO Ratings (uid, score, review) VALUES (9, 2, 'Praesent id massa id nisl venenatis lacinia. Aenean sit amet justo. Morbi ut odio. Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.');
-INSERT INTO Ratings (uid, score, review) VALUES (14, 4, 'Duis mattis egestas metus. Aenean fermentum.');
-
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu, adipiscing molestie, hendrerit at, vulputate vitae, nisl.'), (select R.rtid from Ratings R where R.review='Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu, adipiscing molestie, hendrerit at, vulputate vitae, nisl.'), 1000000000);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.'), (select R.rtid from Ratings R where R.review='Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.'), 1000000001);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Duis aliquam convallis nunc.'), (select R.rtid from Ratings R where R.review='Duis aliquam convallis nunc.'), 1000000009);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Phasellus in felis.'), (select R.rtid from Ratings R where R.review='Phasellus in felis.'), 1000000002);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Donec semper sapien a libero. Nam dui. Proin leo odio, porttitor id, consequat in, consequat ut, nulla.'), (select R.rtid from Ratings R where R.review='Donec semper sapien a libero. Nam dui. Proin leo odio, porttitor id, consequat in, consequat ut, nulla.'), 1000000003);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Vestibulum quam sapien, varius ut, blandit non, interdum in, ante. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Duis faucibus accumsan odio. Curabitur convallis. Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor. Morbi vel lectus in quam fringilla rhoncus. Mauris enim leo, rhoncus sed, vestibulum sit amet, cursus id, turpis. Integer aliquet, massa id lobortis convallis, tortor risus dapibus augue, vel accumsan tellus nisi eu orci.'), (select R.rtid from Ratings R where R.review='Vestibulum quam sapien, varius ut, blandit non, interdum in, ante. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Duis faucibus accumsan odio. Curabitur convallis. Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor. Morbi vel lectus in quam fringilla rhoncus. Mauris enim leo, rhoncus sed, vestibulum sit amet, cursus id, turpis. Integer aliquet, massa id lobortis convallis, tortor risus dapibus augue, vel accumsan tellus nisi eu orci.'), 1000000004);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Nullam varius. Nulla facilisi. Cras non velit nec nisi vulputate nonummy. Maecenas tincidunt lacus at velit.'), (select R.rtid from Ratings R where R.review='Nullam varius. Nulla facilisi. Cras non velit nec nisi vulputate nonummy. Maecenas tincidunt lacus at velit.'), 1000000005);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Ut tellus.'), (select R.rtid from Ratings R where R.review='Ut tellus.'), 1000000006);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Duis mattis egestas metus. Aenean fermentum.'), (select R.rtid from Ratings R where R.review='Duis mattis egestas metus. Aenean fermentum.'), 1000000007);
-INSERT INTO Gives (timeStamp, uid, rtid, bid) (select now()::timestamptz(0), (select R.uid from Ratings R where R.review='Praesent id massa id nisl venenatis lacinia. Aenean sit amet justo. Morbi ut odio. Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.'), (select R.rtid from Ratings R where R.review='Praesent id massa id nisl venenatis lacinia. Aenean sit amet justo. Morbi ut odio. Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo.'), 1000000008);
-
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100000, 1000000000, 'Thank you for the high score! We were very happy to be able to serve you. Please come again!');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100001, 1000000001, 'We were happy to be able to serve you as well!');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100002, 1000000003, 'Thank you for the score. What can we do better to serve you?');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100003, 1000000009, 'Hey the score is too low! Increase it!');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100004, 1000000004, 'Your presence is a 3 as well');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100005, 1000000005, 'Love to see more 5s from you!');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100006, 1000000002, 'Number 1 is where we truly belong!');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100007, 1000000006, 'Come on, we are definitely a number 1...');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100008, 1000000008, 'The more the merrier...');
-INSERT INTO Response (timeStamp, rtid, bid, textResponse) (select now()::timestamptz(0), 100009, 1000000007, 'Hey, what can we do to get the 5 from you?');
-
-INSERT INTO Photos (rid, caption, file) VALUES (1000000, 'Re-engineered full-range methodology', 'http://dummyimage.com/174x108.png/dddddd/000000');
-INSERT INTO Photos (rid, caption, file) VALUES (1000001, 'Realigned fresh-thinking portal', 'http://dummyimage.com/246x118.bmp/ff4444/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000002, 'Team-oriented homogeneous hierarchy', 'http://dummyimage.com/151x131.png/cc0000/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000003, 'Focused heuristic utilisation', 'http://dummyimage.com/174x113.bmp/ff4444/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000004, 'Diverse incremental contingency', 'http://dummyimage.com/196x185.jpg/ff4444/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000005, 'User-friendly clear-thinking support', 'http://dummyimage.com/234x219.png/ff4444/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000006, 'Re-engineered responsive encryption', 'http://dummyimage.com/135x237.jpg/5fa2dd/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000007, 'Fully-configurable actuating forecast', 'http://dummyimage.com/180x137.png/5fa2dd/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000008, 'Multi-channelled homogeneous secured line', 'http://dummyimage.com/230x144.png/ff4444/ffffff');
-INSERT INTO Photos (rid, caption, file) VALUES (1000009, 'Centralized dedicated throughput', 'http://dummyimage.com/174x242.bmp/dddddd/000000');
-
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000000, 1, False, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000000, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000000, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000000, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000000, 2, False, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000000, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000000, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000000, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000000, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000000, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000000, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000000, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000000, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000000, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000000, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000000, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000000, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000000, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000000, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000000, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000000, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000000, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000000, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000000, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000000, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000000, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000000, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000000, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000001, 3, False, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000001, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000001, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000001, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000001, 4, False, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000001, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000001, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000001, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000001, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000001, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000001, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000001, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000001, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000001, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000001, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000001, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000001, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000001, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000001, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000001, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000001, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000001, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000001, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000001, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000001, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000001, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000001, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000001, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000002, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000002, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000002, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000002, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000002, 5, False, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000002, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000002, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000002, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000002, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000002, 6, False, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000002, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000002, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000002, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000002, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000002, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000002, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000002, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000002, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000002, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000002, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000002, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000002, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000002, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000002, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000002, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000002, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000002, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000002, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000003, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000003, 7, False, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000003, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000003, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000003, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000003, 8, False, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000003, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000003, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000003, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000003, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000003, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000003, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000003, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000003, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000003, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000003, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000003, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000003, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000003, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000003, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000003, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000003, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000003, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000003, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000003, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000003, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000003, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000003, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000004, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000004, 9, False, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000004, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000004, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000004, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000004, 10, False, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000004, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000004, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000004, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000004, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000004, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000004, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000004, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000004, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000004, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000004, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000004, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000004, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000004, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000004, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000004, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000004, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000004, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000004, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000004, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000004, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000004, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000004, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000005, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000005, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000005, 11, False, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000005, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000005, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000005, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000005, 12, False, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000005, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000005, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000005, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000005, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000005, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000005, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000005, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000005, 13, False, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000005, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000005, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000005, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000005, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000005, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000005, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000005, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000005, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000005, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000005, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000005, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000005, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000005, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000006, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000006, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000006, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000006, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000006, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000006, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000006, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000006, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000006, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000006, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000006, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000006, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000006, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000006, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000006, 14, False, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000006, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000006, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000006, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000006, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000006, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000006, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000006, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000006, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000006, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000006, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000006, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000006, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000006, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000007, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000007, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000007, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000007, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000007, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000007, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000007, 15, False, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000007, 16, False, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000007, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000007, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000007, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000007, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000007, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000007, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000007, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000007, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000007, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000007, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000007, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000007, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000007, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000007, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000007, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000007, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000007, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000007, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000007, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000007, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000008, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000008, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000008, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000008, 17, False, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000008, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000008, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000008, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000008, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000008, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000008, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000008, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000008, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000008, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000008, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000008, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000008, 18, False, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000008, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000008, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000008, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000008, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000008, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000008, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000008, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000008, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000008, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000008, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000008, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000008, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000009, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000009, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000009, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000009, 19, False, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000009, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000009, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000009, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000009, 20, False, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000009, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000009, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000009, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000009, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000009, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000009, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000009, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000009, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000009, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000009, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000009, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000009, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000009, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000009, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000009, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000009, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000009, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000009, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000009, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000009, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000010, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000010, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000010, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000010, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000010, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000010, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000010, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000010, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000010, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000010, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000010, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000010, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000010, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000010, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000010, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000010, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000010, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000010, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000010, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000010, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000010, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000010, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000010, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000010, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000010, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000010, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000010, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000010, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000011, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000011, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000011, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000011, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000011, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000011, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000011, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000011, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000011, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000011, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000011, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000011, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000011, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000011, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000011, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000011, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000011, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000011, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000011, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000011, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000011, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000011, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000011, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000011, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000011, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000011, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000011, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000011, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000012, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000012, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000012, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000012, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000012, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000012, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000012, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000012, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000012, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000012, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000012, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000012, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000012, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000012, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000012, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000012, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000012, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000012, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000012, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000012, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000012, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000012, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000012, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000012, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000012, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000012, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000012, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000012, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000013, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000013, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000013, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000013, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000013, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000013, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000013, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000013, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000013, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000013, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000013, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000013, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000013, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000013, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000013, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000013, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000013, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000013, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000013, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000013, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000013, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000013, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000013, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000013, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000013, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000013, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000013, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000013, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000014, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000014, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000014, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000014, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000014, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000014, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000014, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000014, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000014, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000014, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000014, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000014, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000014, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000014, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000014, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000014, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000014, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000014, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000014, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000014, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000014, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000014, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000014, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000014, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000014, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000014, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000014, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000014, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000015, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000015, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000015, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000015, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000015, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000015, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000015, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000015, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000015, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000015, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000015, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000015, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000015, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000015, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000015, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000015, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000015, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000015, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000015, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000015, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000015, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000015, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000015, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000015, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000015, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000015, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000015, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000015, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000016, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000016, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000016, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000016, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000016, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000016, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000016, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000016, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000016, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000016, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000016, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000016, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000016, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000016, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000016, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000016, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000016, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000016, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000016, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000016, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000016, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000016, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000016, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000016, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000016, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000016, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000016, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000016, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000017, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000017, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000017, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000017, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000017, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000017, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000017, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000017, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000017, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000017, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000017, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000017, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000017, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000017, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000017, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000017, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000017, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000017, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000017, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000017, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000017, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000017, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000017, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000017, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000017, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000017, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000017, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000017, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000018, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000018, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000018, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000018, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000018, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000018, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000018, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000018, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000018, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000018, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000018, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000018, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000018, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000018, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000018, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000018, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000018, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000018, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000018, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000018, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000018, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000018, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000018, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000018, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000018, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000018, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000018, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000018, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000019, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000019, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000019, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000019, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000019, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000019, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000019, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000019, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000019, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000019, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000019, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000019, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000019, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000019, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000019, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000019, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000019, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000019, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000019, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000019, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000019, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000019, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000019, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000019, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000019, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000019, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000019, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000019, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000020, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000020, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000020, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000020, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000020, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000020, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000020, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000020, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000020, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000020, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000020, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000020, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000020, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000020, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000020, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000020, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000020, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000020, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000020, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000020, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000020, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000020, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000020, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000020, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000020, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000020, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000020, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000020, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000021, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000021, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000021, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000021, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000021, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000021, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000021, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000021, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000021, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000021, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000021, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000021, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000021, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000021, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000021, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000021, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000021, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000021, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000021, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000021, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000021, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000021, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000021, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000021, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000021, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000021, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000021, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000021, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000022, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000022, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000022, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000022, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000022, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000022, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000022, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000022, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000022, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000022, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000022, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000022, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000022, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000022, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000022, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000022, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000022, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000022, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000022, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000022, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000022, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000022, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000022, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000022, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000022, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000022, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000022, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000022, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000023, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000023, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000023, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000023, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000023, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000023, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000023, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000023, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000023, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000023, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000023, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000023, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000023, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000023, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000023, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000023, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000023, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000023, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000023, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000023, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000023, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000023, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000023, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000023, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000023, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000023, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000023, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000023, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000024, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000024, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000024, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000024, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000024, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000024, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000024, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000024, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000024, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000024, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000024, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000024, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000024, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000024, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000024, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000024, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000024, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000024, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000024, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000024, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000024, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000024, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000024, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000024, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000024, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000024, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000024, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000024, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000025, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000025, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000025, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000025, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000025, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000025, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000025, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000025, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000025, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000025, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000025, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000025, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000025, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000025, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000025, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000025, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000025, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000025, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000025, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000025, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000025, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000025, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000025, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000025, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000025, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000025, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000025, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000025, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000026, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000026, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000026, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000026, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000026, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000026, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000026, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000026, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000026, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000026, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000026, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000026, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000026, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000026, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000026, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000026, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000026, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000026, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000026, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000026, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000026, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000026, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000026, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000026, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000026, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000026, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000026, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000026, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000027, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000027, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000027, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000027, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000027, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000027, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000027, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000027, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000027, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000027, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000027, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000027, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000027, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000027, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000027, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000027, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000027, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000027, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000027, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000027, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000027, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000027, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000027, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000027, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000027, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000027, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000027, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000027, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000028, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000028, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000028, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000028, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000028, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000028, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000028, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000028, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000028, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000028, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000028, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000028, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000028, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000028, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000028, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000028, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000028, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000028, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000028, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000028, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000028, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000028, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000028, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000028, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000028, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000028, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000028, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000028, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000029, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000029, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000029, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000029, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000029, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000029, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000029, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000029, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000029, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000029, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000029, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000029, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000029, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000029, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000029, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000029, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000029, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000029, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000029, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000029, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000029, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000029, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000029, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000029, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000029, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000029, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000029, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000029, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000030, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000030, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000030, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000030, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000030, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000030, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000030, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000030, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000030, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000030, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000030, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000030, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000030, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000030, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000030, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000030, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000030, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000030, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000030, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000030, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000030, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000030, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000030, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000030, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000030, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000030, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000030, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000030, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000031, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000031, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000031, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000031, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000031, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000031, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000031, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000031, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000031, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000031, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000031, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000031, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000031, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000031, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000031, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000031, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000031, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000031, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000031, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000031, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000031, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000031, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000031, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000031, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000031, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000031, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000031, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000031, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000032, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000032, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000032, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000032, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000032, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000032, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000032, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000032, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000032, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000032, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000032, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000032, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000032, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000032, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000032, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000032, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000032, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000032, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000032, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000032, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000032, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000032, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000032, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000032, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000032, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000032, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000032, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000032, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000033, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000033, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000033, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000033, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000033, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000033, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000033, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000033, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000033, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000033, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000033, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000033, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000033, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000033, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000033, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000033, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000033, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000033, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000033, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000033, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000033, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000033, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000033, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000033, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000033, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000033, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000033, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000033, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000034, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000034, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000034, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000034, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000034, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000034, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000034, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000034, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000034, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000034, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000034, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000034, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000034, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000034, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000034, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000034, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000034, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000034, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000034, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000034, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000034, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000034, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000034, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000034, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000034, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000034, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000034, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000034, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000035, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000035, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000035, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000035, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000035, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000035, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000035, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000035, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000035, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000035, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000035, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000035, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000035, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000035, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000035, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000035, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000035, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000035, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000035, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000035, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000035, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000035, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000035, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000035, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000035, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000035, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000035, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000035, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000036, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000036, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000036, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000036, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000036, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000036, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000036, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000036, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000036, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000036, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000036, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000036, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000036, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000036, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000036, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000036, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000036, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000036, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000036, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000036, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000036, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000036, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000036, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000036, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000036, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000036, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000036, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000036, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000037, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000037, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000037, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000037, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000037, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000037, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000037, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000037, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000037, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000037, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000037, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000037, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000037, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000037, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000037, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000037, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000037, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000037, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000037, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000037, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000037, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000037, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000037, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000037, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000037, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000037, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000037, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000037, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000038, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000038, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000038, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000038, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000038, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000038, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000038, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000038, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000038, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000038, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000038, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000038, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000038, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000038, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000038, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000038, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000038, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000038, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000038, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000038, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000038, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000038, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000038, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000038, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000038, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000038, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000038, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000038, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000039, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000039, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000039, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000039, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000039, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000039, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000039, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000039, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000039, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000039, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000039, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000039, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000039, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000039, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000039, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000039, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000039, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000039, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000039, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000039, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000039, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000039, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000039, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000039, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000039, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000039, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000039, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000039, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000040, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000040, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000040, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000040, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000040, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000040, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000040, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000040, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000040, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000040, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000040, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000040, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000040, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000040, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000040, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000040, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000040, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000040, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000040, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000040, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000040, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000040, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000040, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000040, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000040, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000040, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000040, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000040, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000041, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000041, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000041, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000041, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000041, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000041, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000041, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000041, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000041, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000041, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000041, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000041, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000041, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000041, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000041, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000041, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000041, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000041, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000041, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000041, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000041, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000041, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000041, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000041, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000041, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000041, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000041, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000041, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000042, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000042, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000042, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000042, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000042, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000042, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000042, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000042, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000042, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000042, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000042, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000042, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000042, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000042, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000042, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000042, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000042, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000042, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000042, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000042, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000042, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000042, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000042, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000042, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000042, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000042, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000042, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000042, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000043, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000043, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000043, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000043, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000043, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000043, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000043, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000043, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000043, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000043, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000043, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000043, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000043, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000043, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000043, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000043, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000043, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000043, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000043, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000043, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000043, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000043, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000043, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000043, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000043, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000043, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000043, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000043, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000044, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000044, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000044, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000044, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000044, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000044, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000044, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('12PM', 1000000044, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000044, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000044, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000044, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('2PM', 1000000044, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000044, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000044, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000044, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('4PM', 1000000044, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000044, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000044, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000044, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('6PM', 1000000044, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000044, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000044, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000044, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('8PM', 1000000044, NULL, True, 8);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000044, NULL, True, 2);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000044, NULL, True, 4);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000044, NULL, True, 6);
-INSERT INTO TABLES(time, bid, reserveId, vacant, seats) VALUES ('10PM', 1000000044, NULL, True, 8);

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Header inclusion-->
+        <%- include ../template/header.ejs %>
+    </head>
+    <body class="bg">
+        <%- include ../template/navbar.ejs %>
+        <br \>
+        <h1 class="hd" style="font-size: 3em;" ><%= title %></h1>
+        <br \>
+        <% if (data.length == 0) { %>
+            <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Sorry, no restaurants were found.</h5>
+                    </div>
+                </div>
+        <% } else { %>
+        <% for(var i =0; i<data.length; i++) { %>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= data[i].name%></h5>
+                        <h6 class="card-subtitle mb-2 text-muted"><%= data[i].type%></h6>
+                        <p class="card-text"><%= data[i].description%></p>
+                        <a href="#" class="card-link">More Information</a>
+                        <a href="#" class="card-link">Reserve</a>
+                    </div>
+                </div>
+                <br \>
+        <%} }%>
+    </body>
+</html>
