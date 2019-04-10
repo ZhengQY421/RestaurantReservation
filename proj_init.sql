@@ -336,7 +336,7 @@ INSERT INTO Branches(rid, pNumber, address, location) select rid, '62728815', '1
 INSERT INTO Branches(rid, pNumber, address, location) select rid, '64659874', '3 Gateway Dr, #01-04, Singapore 608532', 'Westgate' from Restaurants where name='Brotzeit';
 
 INSERT INTO Branches(rid, pNumber, address, location) select rid, '62515337', '106 Clementi Street 12, #01-62, Singapore 120106', 'Clementi' from Restaurants where name='Summer Hill';
-INSERT INTO Branches(rid, pNumber, address, location) select rid, '62195936', '50 Hume Ave, Singapore 596229', 'Bukit Batok' from Restaurants where name='Summer Hill';
+INSERT INTO Branches(rid, pNumber, address, location) selec m  bnb bvg n                        bvb                                              t rid, '62195936', '50 Hume Ave, Singapore 596229', 'Bukit Batok' from Restaurants where name='Summer Hill';
 
 INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Olivia Fong' and R.name='Putien';
 INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Amelia Millie' and R.name='Summer Hill';
@@ -351,7 +351,7 @@ INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restau
 INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Adrianna Fu' and R.name='Itacho Sushi';
 
 INSERT INTO Incentives (incentiveName) VALUES ('Putien 19th Year Anniversary!');
-INSERT INTO Incentives (incentiveName) VALUES ('Summer Promotion at Brotzeit');
+INSERT INTO Incentives (incentiveName) VALUES ('Summer Prom otion at Brotzeit');
 INSERT INTO Incentives (incentiveName) VALUES ('Itacho Sushi 10th Year Anniversary Special');
 INSERT INTO Incentives (incentiveName) VALUES ('Party away at Hard Rock Cafe this April!');
 INSERT INTO Incentives (incentiveName) VALUES ('Enjoy 1 for 1 Pizza at Pizza Maru');
