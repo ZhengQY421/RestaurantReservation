@@ -32,7 +32,7 @@ create table Customers (
 
 create table Restaurants (
     rid             SERIAL,
-    name            TEXT,
+    name            TEXT NOT NULL UNIQUE,
     type            TEXT,
     description     TEXT,
     primary key (rid)
@@ -41,7 +41,7 @@ ALTER SEQUENCE restaurants_rid_seq restart with 1000000;
 
 create table Branches (
     bid             SERIAL,
-    rid             INT,
+    rid             INT NOT NULL,
     pNumber         CHAR(8) UNIQUE,
     address         VARCHAR(100),
     location        TEXT,
@@ -51,11 +51,11 @@ create table Branches (
 ALTER SEQUENCE branches_bid_seq restart with 1000000000;
 
 CREATE OR REPLACE FUNCTION branch_location_check()
-RETURNS TRIGGER AS
+RETURNS TRIGGER AS 
 $$
 DECLARE count NUMERIC;
-BEGIN
-    SELECT COUNT(*) into count
+BEGIN 
+    SELECT COUNT(*) into count 
     FROM Branches B
     WHERE NEW.rid = B.rid
     AND NEW.address = B.address;
@@ -65,7 +65,7 @@ BEGIN
     ELSE
         RETURN NEW;
     END IF;
-END;
+END; 
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER branch_location_check
@@ -76,7 +76,7 @@ EXECUTE PROCEDURE branch_location_check();
 create table Owners (
     uid             INT,
     bid             INT,
-    primary key (bid), --Changed from (uid, bid) to (bid) because
+    primary key (bid), --Changed from (uid, bid) to (bid) because 
                        --each restaurant branch should only have one owner!
     foreign key (uid) references Users (uid) on delete cascade,
     foreign key (bid) references Branches (bid) on delete cascade
@@ -85,13 +85,13 @@ create table Owners (
 CREATE TABLE Incentives (
     iid             SERIAL,
     incentiveName   TEXT NOT NULL UNIQUE,
+    description     TEXT,
     primary key (iid)
 );
 ALTER SEQUENCE incentives_iid_seq restart with 1000000;
 
 CREATE TABLE Discounts (
     iid             INT,
-    description     TEXT,
     percent         INT CHECK(percent > 0 and percent <= 100),
     redeemPts       INT CHECK(redeemPts >= 0),
     PRIMARY KEY (iid),
@@ -100,7 +100,6 @@ CREATE TABLE Discounts (
 
 CREATE TABLE Prizes (
     iid             INT,
-    description     TEXT,
     redeemPts       INT CHECK(redeemPts > 0),
     PRIMARY KEY (iid),
     FOREIGN KEY (iid) REFERENCES Incentives (iid) on delete cascade
@@ -181,16 +180,16 @@ create table Response (
 );
 
 CREATE OR REPLACE FUNCTION ratings_review_check()
-RETURNS TRIGGER AS
+RETURNS TRIGGER AS 
 $$
-BEGIN
+BEGIN 
     IF NEW.score IS NULL AND NEW.review IS NULL THEN
         RAISE NOTICE 'Invalid!';
         RETURN NULL;
     ELSE
         RETURN NEW;
     END IF;
-END;
+END; 
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ratings_review_check
@@ -226,14 +225,6 @@ create table Tables (
     FOREIGN KEY (reserveId) references Reserves (reserveId),
     FOREIGN KEY (bid) references Branches (bid)
 );
-
-create or replace view accountTypes (uid, isCustomer, isOwner) as
-select
-uid,
-coalesce((select true from Customers C where C.uid = U.uid), false),
-coalesce((select true from (select distinct uid from Owners O) as A where A.uid = U.uid), false)
-from Users U
-;
 
 INSERT INTO Users(name, email, password) VALUES ('Oliver Zheng', 'oliver@gmail.com', 'password');
 INSERT INTO Users(name, email, password) VALUES ('Edenuis Lua', 'edenuis@yahoo.com.sg', 'password1');
@@ -350,52 +341,53 @@ INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restau
 INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Edenuis Lua' and R.name='Hai Di Lao Hot Pot';
 INSERT INTO Owners(uid, bid) select U.uid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Adrianna Fu' and R.name='Itacho Sushi';
 
-INSERT INTO Incentives (incentiveName) VALUES ('Putien 19th Year Anniversary!');
-INSERT INTO Incentives (incentiveName) VALUES ('Summer Promotion at Brotzeit');
-INSERT INTO Incentives (incentiveName) VALUES ('Itacho Sushi 10th Year Anniversary Special');
-INSERT INTO Incentives (incentiveName) VALUES ('Party away at Hard Rock Cafe this April!');
-INSERT INTO Incentives (incentiveName) VALUES ('Enjoy 1 for 1 Pizza at Pizza Maru');
-INSERT INTO Incentives (incentiveName) VALUES ('Spend time with your family @ Paris Baguette!');
-INSERT INTO Incentives (incentiveName) VALUES ('Leave your mark at Graffiti Cafe!');
-INSERT INTO Incentives (incentiveName) VALUES ('Haidilao dinner promotion');
-INSERT INTO Incentives (incentiveName) VALUES ('Its Summer time @ Summer Hill');
-INSERT INTO Incentives (incentiveName) VALUES ('Couples Promotion @ Cali');
-INSERT INTO Incentives (incentiveName) VALUES ('Spicy red hot wings @ Bonchon');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Putien 19th Year Anniversary!', 'Celebrate with us and enjoy 50% discount at all Putien Outlets from 12 April to 12 May!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Summer Promotion at Brotzeit', 'Enjoy 20% off on all main course at Brotzeit this summer. Promotion is valid only from 1st April to 30th April.');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Itacho Sushi 10th Year Anniversary Special', 'Enjoy 40% off at all Itacho Sushi outlets this April!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Party away at Hard Rock Cafe this April!', 'This April, Hard Rock Cafe will be hosting a 15% off on all main course from 12 April to 19 April! Time to party the heat away!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Enjoy 1 for 1 Pizza at Pizza Maru', 'Share a pizza with your loved ones this April!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Spend time with your family @ Paris Baguette!', 'Spend some time with your family at Paris Baguette! 30% off on all items. Hurry down today!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Leave your mark at Graffiti Cafe!', 'Leave your mark at Graffiti Cafe this April and enjoy a 10% discount on all main course items.');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Haidilao dinner promotion', 'Enjoy a 10% discount during dinner period at Hai Di Lao. Promotion is valid at all outlets.');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Its Summer time @ Summer Hill', 'Cool yourself down this summer at Summer Hill and enjoy 25% off on all items while you are there!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Couples Promotion @ Cali', NULL);
+INSERT INTO Incentives (incentiveName, description) VALUES ('Spicy red hot wings @ Bonchon', 'Sweat it out with Bonchon Spicy Red Hot Wings! Enjoy 70% off on second meal ordered');
 
-INSERT INTO Incentives (incentiveName) VALUES ('All-inclusive Premium Set Lunch @ Putien');
-INSERT INTO Incentives (incentiveName) VALUES ('Haidilao All-day set meal');
-INSERT INTO Incentives (incentiveName) VALUES ('Bonchon: 6pcs wings for $5 nett!');
-INSERT INTO Incentives (incentiveName) VALUES ('MEGA PROMO at Paris Baguette Cafe');
-INSERT INTO Incentives (incentiveName) VALUES ('Giant teddy bear');
-INSERT INTO Incentives (incentiveName) VALUES ('Movie Tickets');
-INSERT INTO Incentives (incentiveName) VALUES ('Laptop Cover');
-INSERT INTO Incentives (incentiveName) VALUES ('Mini Note Book');
-INSERT INTO Incentives (incentiveName) VALUES ('Spill-Free Tumbler');
-INSERT INTO Incentives (incentiveName) VALUES ('Portable Charger');
-INSERT INTO Incentives (incentiveName) VALUES ('Couple Vacation Stay');
+INSERT INTO Incentives (incentiveName, description) VALUES ('All-inclusive Premium Set Lunch @ Putien', 'Enjoy your lunch at Putien for only $20 Nett');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Haidilao All-day set meal', '$15 nett for all Haidilao All-day set meals. Valid only at selected outlets');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Bonchon: 6pcs wings for $5 nett!', 'Delicious wings waiting for you!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('MEGA PROMO at Paris Baguette Cafe', '$5 voucher for all pastries!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Giant teddy bear', 'Donate this teddy bear to kid in need');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Movie Tickets', 'A pair of movie tickets to enjoy with your partner');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Jaguar Pen', 'Perfect birthday gift');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Mini Note Book', 'Record your travels with this mini note book');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Spill-Free Tumbler', 'No more spills to worry about!');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Portable Charger', '18000mAh, 1kg');
+INSERT INTO Incentives (incentiveName, description) VALUES ('Couple Vacation Stay', 'Enjoy a 2D1N vacation stay at Resort World Sentosa with your partner!');
 
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Celebrate with us and enjoy 50% discount at all Putien Outlets from 12 April to 12 May!', 50, 0 from Incentives I where I.incentiveName='Putien 19th Year Anniversary!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Enjoy 20% off on all main course at Brotzeit this summer. Promotion is valid only from 1st April to 30th April.', 20, 50 from Incentives I where I.incentiveName='Summer Promotion at Brotzeit';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Enjoy 40% off at all Itacho Sushi outlets this April!', 40, 75 from Incentives I where I.incentiveName='Itacho Sushi 10th Year Anniversary Special';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'This April, Hard Rock Cafe will be hosting a 15% off on all main course from 12 April to 19 April! Time to party the heat away!', 15, 35 from Incentives I where I.incentiveName='Party away at Hard Rock Cafe this April!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Share a pizza with your loved ones this April!', 50, 80 from Incentives I where I.incentiveName='Enjoy 1 for 1 Pizza at Pizza Maru';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Spend some time with your family at Paris Baguette! 30% off on all items. Hurry down today!', 30, 75 from Incentives I where I.incentiveName='Spend time with your family @ Paris Baguette!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Leave your mark at Graffiti Cafe this April and enjoy a 10% discount on all main course items.', 10, 15 from Incentives I where I.incentiveName='Leave your mark at Graffiti Cafe!';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Enjoy a 10% discount during dinner period at Hai Di Lao. Promotion is valid at all outlets.', 10, 30 from Incentives I where I.incentiveName='Haidilao dinner promotion';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Cool yourself down this summer at Summer Hill and enjoy 25% off on all items while you are there!', 25, 50 from Incentives I where I.incentiveName='Its Summer time @ Summer Hill';
-INSERT INTO Discounts (iid, description, percent, redeemPts) select iid, 'Sweat it out with Bonchon Spicy Red Hot Wings! Enjoy 70% off on second meal ordered', 70, 45 from Incentives I where I.incentiveName='Spicy red hot wings @ Bonchon';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 50, 0 from Incentives I where I.incentiveName='Putien 19th Year Anniversary!';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 20, 50 from Incentives I where I.incentiveName='Summer Promotion at Brotzeit';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 40, 75 from Incentives I where I.incentiveName='Itacho Sushi 10th Year Anniversary Special';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 15, 35 from Incentives I where I.incentiveName='Party away at Hard Rock Cafe this April!';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 50, 80 from Incentives I where I.incentiveName='Enjoy 1 for 1 Pizza at Pizza Maru';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 30, 75 from Incentives I where I.incentiveName='Spend time with your family @ Paris Baguette!';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 10, 15 from Incentives I where I.incentiveName='Leave your mark at Graffiti Cafe!';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 10, 30 from Incentives I where I.incentiveName='Haidilao dinner promotion';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 25, 50 from Incentives I where I.incentiveName='Its Summer time @ Summer Hill';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 70, 45 from Incentives I where I.incentiveName='Spicy red hot wings @ Bonchon';
+INSERT INTO Discounts (iid, percent, redeemPts) select iid, 25, 50 from Incentives I where I.incentiveName='Couple Promotion @ Cali';
 
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Enjoy your lunch at Putien for only $20 Nett', 75 from Incentives I where I.incentiveName='All-inclusive Premium Set Lunch @ Putien';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, '$15 nett for all Haidilao All-day set meals. Valid only at selected outlets', 100 from Incentives I where I.incentiveName='Haidilao All-day set meal';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Delicious wings waiting for you!', 25 from Incentives I where I.incentiveName='Bonchon: 6pcs wings for $5 nett!';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, '$5 voucher for all pastries!', 25 from Incentives I where I.incentiveName='MEGA PROMO at Paris Baguette Cafe';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Donate this teddy bear to kid in need', 50 from Incentives I where I.incentiveName='Giant teddy bear';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'A pair of movie tickets to enjoy with your partner', 100 from Incentives I where I.incentiveName='Movie Tickets';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Perfect birthday gift', 250 from Incentives I where I.incentiveName='Jaguar Pen';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Record your travels with this mini note book', 20 from Incentives I where I.incentiveName='Mini Note Book';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'No more spills to worry about!', 200 from Incentives I where I.incentiveName='Spill-Free Tumbler';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, '18000mAh, 1kg', 150 from Incentives I where I.incentiveName='Portable Charger';
-INSERT INTO Prizes (iid, description,  redeemPts) select iid, 'Enjoy a 2D1N vacation stay at Resort World Sentosa with your partner!', 500 from Incentives I where I.incentiveName='Couple Vacation Stay';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 75 from Incentives I where I.incentiveName='All-inclusive Premium Set Lunch @ Putien';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 100 from Incentives I where I.incentiveName='Haidilao All-day set meal';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 25 from Incentives I where I.incentiveName='Bonchon: 6pcs wings for $5 nett!';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 25 from Incentives I where I.incentiveName='MEGA PROMO at Paris Baguette Cafe';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 50 from Incentives I where I.incentiveName='Giant teddy bear';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 100 from Incentives I where I.incentiveName='Movie Tickets';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 250 from Incentives I where I.incentiveName='Jaguar Pen';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 20 from Incentives I where I.incentiveName='Mini Note Book';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 200 from Incentives I where I.incentiveName='Spill-Free Tumbler';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 150 from Incentives I where I.incentiveName='Portable Charger';
+INSERT INTO Prizes (iid,  redeemPts) select iid, 500 from Incentives I where I.incentiveName='Couple Vacation Stay';
 
 insert into Choose (timeStamp, uid, iid) (select now()::timestamptz(0), (select U.uid from Users U where U.name='Jack-Jack Parr'), (select I.iid from Incentives I WHERE I.incentivename='Spicy red hot wings @ Bonchon'));
 insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Violet Parr'), (select I.iid from Incentives I WHERE I.incentivename='Giant teddy bear'));
