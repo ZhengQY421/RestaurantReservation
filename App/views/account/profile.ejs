@@ -1,49 +1,60 @@
 <!DOCTYPE html>
 <html>
     <head>
-         <!-- Header inclusion-->
-         <%- include ../template/header.ejs %>
+        <!-- Header inclusion-->
+        <%- include ../template/header.ejs %>
     </head>
     <body style="background-color: #fcfffd;">
-
         <%- include ../template/navbar.ejs %>
-        <br \>
-
-        
+        <br \ />
 
         <div class="container col-6">
-            <h1 class="hdb" style="font-size: 3em;" ><%= currentUser.name %>'s Profile</h1>
-            <div class="row">
-                <div class="card col">
-                    <div class="card-body">
-                        <div class = "row">
-                            <div class="col-6">
-                                <h5><b>Name:</b>&nbsp;&nbsp;&nbsp;<%= data[0].name%></h5>
-                            </div>
-                            <div class="col-6">
-                                <h5><b>E-mail:</b>&nbsp;&nbsp;&nbsp;<%= data[0].email%></h5>
-                            </div>
+            <h1 class="hdb" style="font-size: 3em;">
+                <%= currentUser.name %>'s Profile
+            </h1>
+
+            <div class="card col">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h5>
+                                <b>Name:</b>&nbsp;&nbsp;&nbsp;<%= data[0].name%>
+                            </h5>
                         </div>
-                        <div class = "row">
-                            <% if (currentUser.iscustomer) { %>
-                            <div class="col-6">
-                                <h5><b>Address:</b>&nbsp;&nbsp;&nbsp;<%= data[0].address%></h5>
-                            </div>
-                            <div class="col-6">
-                                <h5><b>Phone Number:</b>&nbsp;&nbsp;&nbsp;<%= data[0].pnumber%></h5>
-                            </div>
-                            <% } %>
+                        <div class="col-6">
+                            <h5>
+                                <b>E-mail:</b>&nbsp;&nbsp;&nbsp;
+                                <%=data[0].email%>
+                            </h5>
                         </div>
                     </div>
+                    <div class="row">
+                        <% if (currentUser.iscustomer) { %>
+                        <div class="col-6">
+                            <h5>
+                                <b>Address:</b>&nbsp;&nbsp;&nbsp;
+                                <%=data[0].address%>
+                            </h5>
+                        </div>
+                        <div class="col-6">
+                            <h5>
+                                <b>Phone Number:</b>&nbsp;&nbsp;&nbsp;
+                                <%=data[0].pnumber%>
+                            </h5>
+                        </div>
+                        <% } %>
+                    </div>
                 </div>
-                
             </div>
+
+            <% if (currentUser.iscustomer) { %>
+            <h1 class="hdb" style="font-size: 3em;">
+                <%= currentUser.name %>'s Profile
+            </h1>
+            <div class="card col">
+                <div class="card-body"></div>
+            </div>
+            <% } %>
         </div>
-
-        
-
-        
-
-
     </body>
 </html>
