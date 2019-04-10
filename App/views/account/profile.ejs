@@ -17,29 +17,28 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
-                            <h5>
-                                <b>Name:</b>&nbsp;&nbsp;&nbsp;<%= data[0].name%>
-                            </h5>
+                            <h5><b>Name:</b><br \ /><%= userData[0].name%></h5>
                         </div>
                         <div class="col-6">
                             <h5>
-                                <b>E-mail:</b>&nbsp;&nbsp;&nbsp;
-                                <%=data[0].email%>
+                                <b>E-mail:</b><br \ />
+                                <%=userData[0].email%>
                             </h5>
                         </div>
                     </div>
+                    <br \ />
                     <div class="row">
                         <% if (currentUser.iscustomer) { %>
                         <div class="col-6">
                             <h5>
-                                <b>Address:</b>&nbsp;&nbsp;&nbsp;
-                                <%=data[0].address%>
+                                <b>Address:</b><br \ />
+                                <%=userData[0].address%>
                             </h5>
                         </div>
                         <div class="col-6">
                             <h5>
-                                <b>Phone Number:</b>&nbsp;&nbsp;&nbsp;
-                                <%=data[0].pnumber%>
+                                <b>Phone Number:</b><br \ />
+                                <%=userData[0].pnumber%>
                             </h5>
                         </div>
                         <% } %>
@@ -52,7 +51,23 @@
                 Rewards
             </h2>
             <div class="card col">
-                <div class="card-body"></div>
+                <div class="card-body">
+                    <% if (incentiveData.length == 0) { %> 
+                        You don't have any rewards! Go buy some from the rewards store! 
+                    <% } else { %>
+
+                        <% for(var i=0; i<incentiveData.length; i++) { %> 
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= incentiveData[i].incentivename%></h5>
+                                    <h6 class="card-subtitle mb-2 text-muted"><%= incentiveData[i].description%></h6>
+                                </div>
+                            </div>
+                            <br \>
+                        <% }%>
+                                
+                    <% } %>
+                </div>
             </div>
             <% } %>
         </div>
