@@ -78,21 +78,18 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
                                 if (req.body.signupType === "Customer") {
                                     console.log(addr);
                                     sql_query =
-                                        "INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '" +
+                                        "INSERT INTO Customers(uid, address, pNumber, rewardPt) values ((select U.uid from Users U where U.name=" +
+                                        "'" +
+                                        name +
+                                        "'),'" +
                                         addr +
                                         "','" +
                                         pNum +
-                                        "', 0 " +
-                                        "from Users U where U.name=" +
-                                        "'" +
-                                        name +
-                                        "';";
+                                        "', 0)";
                                 } else if (req.body.signupType === "Owner") {
-                                    sql_query =
-                                        "INSERT INTO Owners(uid, bid) select U.uid,null from Users U where U.name=" +
-                                        "'" +
-                                        name +
-                                        "';";
+                                    req.session.valid = name;
+                                    res.redirect(303, "/restaurant/add");
+                                    return;
                                 }
 
                                 pool.query(sql_query, (err, data) => {
@@ -123,16 +120,37 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
     );
 });
 
+router.post("/addOwner", checkLoggedOut, function(req, res, next) {
+    var info = req.session.valid;
+    req.session.valid = null;
+
+    pool.query(
+        "insert into owners(uid, rid, bid) values ((select U.uid from Users U where U.name=$1), (select R.rid from restaurants R where R.name=$2), (select bid from branches b where b.rid=(select R.rid from restaurants R where R.name=$2)))",
+        [info[1], info[0]],
+        (err, data) => {
+            console.log(req.body.name);
+            if (err) {
+                console.log(err);
+                console.log("error inserting owner");
+                failRegister(req, res);
+                return;
+            }
+            req.flash(
+                "success",
+                "Account and restaurant created. You may log in now."
+            );
+            res.redirect("/");
+        }
+    );
+});
+
 /* ---- GET for profile ---- */
 router.get("/profile", checkLoggedIn, function(req, res, next) {
     var sql_query = "";
 
-    console.log(req.user);
-    console.log(req.user.iscustomer);
-
     if (req.user.iscustomer) {
         sql_query =
-            "select * from Users natural join Customers natural join Choose natural join incentives where Users.uid = " +
+            "select * from Users natural join Customers where Users.uid = " +
             "'" +
             req.user.uid +
             "'";
@@ -144,17 +162,31 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
             "'";
     }
 
-    pool.query(sql_query, (err, dataUser) => {
+    pool.query(sql_query, (err, userData) => {
         if (err) {
             console.log(err);
             return;
         }
 
-        res.render("account/profile", {
-            title: "User Profile",
-            currentUser: req.user,
-            data: dataUser.rows
-        });
+        pool.query(
+            "select * from choose C natural join Incentives i where C.uid=$1",
+            [req.user.uid],
+            function(err, incentiveData) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+
+                console.log(incentiveData);
+
+                res.render("account/profile", {
+                    title: "User Profile",
+                    currentUser: req.user,
+                    userData: userData.rows,
+                    incentiveData: incentiveData.rows
+                });
+            }
+        );
     });
 });
 
