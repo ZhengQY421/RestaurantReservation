@@ -347,7 +347,6 @@ INSERT INTO Owners(uid, rid, bid) select U.uid, R.rid, B.bid from Users U CROSS 
 INSERT INTO Owners(uid, rid, bid) select U.uid, R.rid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Edenuis Lua' and R.name='Hai Di Lao Hot Pot';
 INSERT INTO Owners(uid, rid, bid) select U.uid, R.rid, B.bid from Users U CROSS JOIN (Restaurants R inner join Branches B on R.rid=B.rid) where U.name='Adrianna Fu' and R.name='Itacho Sushi';
 
-INSERT INTO Incentives (incentiveName, description, redeemPts) VALUES ('Laptop Cover', 'very cool' 30);
 INSERT INTO Incentives (incentiveName, description, redeemPts) VALUES ('Putien 19th Year Anniversary!', 'Celebrate with us and enjoy 50% discount at all Putien Outlets from 12 April to 12 May!', 0);
 INSERT INTO Incentives (incentiveName, description, redeemPts) VALUES ('Summer Promotion at Brotzeit', 'Enjoy 20% off on all main course at Brotzeit this summer. Promotion is valid only from 1st April to 30th April.', 50);
 INSERT INTO Incentives (incentiveName, description, redeemPts) VALUES ('Itacho Sushi 10th Year Anniversary Special', 'Enjoy 40% off at all Itacho Sushi outlets this April!', 75);
