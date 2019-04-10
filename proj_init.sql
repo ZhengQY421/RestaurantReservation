@@ -228,6 +228,14 @@ create table Tables (
     FOREIGN KEY (rid, bid) references Branches (rid, bid)
 );
 
+create or replace view accountTypes (uid, isCustomer, isOwner) as
+select
+uid,
+coalesce((select true from Customers C where C.uid = U.uid), false),
+coalesce((select true from (select distinct uid from Owners O) as A where A.uid = U.uid), false)
+from Users U
+;
+
 INSERT INTO Users(name, email, password) VALUES ('Oliver Zheng', 'oliver@gmail.com', 'password');
 INSERT INTO Users(name, email, password) VALUES ('Edenuis Lua', 'edenuis@yahoo.com.sg', 'password1');
 INSERT INTO Users(name, email, password) VALUES ('Adrianna Fu', 'adrianna@outlook.com', 'password2');
@@ -235,7 +243,7 @@ INSERT INTO Users(name, email, password) VALUES ('Tom Hardy', 'hardtom@gmail.com
 INSERT INTO Users(name, email, password) VALUES ('Jane Smooth', 'smoothiejanie@open.io', 'password4');
 INSERT INTO Users(name, email, password) VALUES ('Baby Max', 'Iamcute@tippy.com', 'password5');
 INSERT INTO Users(name, email, password) VALUES ('Captain America', 'avengersunited@ua.gov.sg', 'password6');
-INSERT INTO Users(name, email, password) VALUES ('Pikachu', 'zapthemall@pokemon.org', 'password7');
+INSERT INTO Users(name, email, password) VALUES ('Pikachu Pie', 'pika@chu.com', 'pika');
 INSERT INTO Users(name, email, password) VALUES ('Ash Ketchup', 'catchthemall@pokemon.org', 'password8');
 INSERT INTO Users(name, email, password) VALUES ('Kane Crook', 'crookedKane@bullock.com', 'password9');
 INSERT INTO Users(name, email, password) VALUES ('Green Broccoli', 'Iamdelicious@bullock.com', 'password10');
@@ -258,7 +266,7 @@ INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '490 Jalan 
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 555E Crona Road Grove SINGAPORE 632951', '85559123', 205 from Users U where U.name='Bruise Wayne';
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 441A Jalan Oberbrunner Grove SINGAPORE 373484', '85554657', 350 from Users U where U.name='Baby Max';
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 146D Farrell Place Park SINGAPORE 173569', '95559431', 75 from Users U where U.name='Captain America';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 965C Friesen Crescent Way SINGAPORE 706461', '95551651', 55 from Users U where U.name='Pikachu';
+INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 965C Friesen Crescent Way SINGAPORE 706461', '95551651', 55 from Users U where U.name='Pikachu Pie';
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '376 Von Alley Park SINGAPORE 067166', '95554089', 165 from Users U where U.name='Ash Ketchup';
 
 INSERT INTO Restaurants(name, type, description) VALUES ('Putien', 'Casual Dining', 'Seafood, Singaporean, Chinese');

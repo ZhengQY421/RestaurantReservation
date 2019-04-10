@@ -132,7 +132,7 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
 
     if (req.user.iscustomer) {
         sql_query =
-            "select * from Users natural join Customers natural join Choose where Users.uid = " +
+            "select * from Users natural join Customers natural join Choose natural join incentives where Users.uid = " +
             "'" +
             req.user.uid +
             "'";
