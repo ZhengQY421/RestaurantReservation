@@ -171,7 +171,7 @@ create table Response (
     rid             INT NOT NULL,
     bid             INT NOT NULL,
     textResponse    TEXT NOT NULL,
-    PRIMARY KEY(rtid, rid, bid, timeStamp),
+    PRIMARY KEY(rtid, rid, bid),
     FOREIGN KEY (rtid) references Ratings(rtid) on delete cascade,
     FOREIGN KEY (rid, bid) references Branches(rid, bid) on delete cascade
 );
