@@ -60,7 +60,6 @@ router.all('/', checkLoggedIn, async function(req, res, next){
 });
 
 router.post('/submit', checkLoggedIn, function(req, res, next){
-    var status = 1;
     pool.connect(function(err, client, done) {
         function abort(err) {
             if(err) {
@@ -80,31 +79,49 @@ router.post('/submit', checkLoggedIn, function(req, res, next){
                     return;
                 }
                 if(!res2.rows.length) {
-                    status = 0;
                     var url = "/reservation?name=" + req.query.name +"&address="+ req.query.address;
                     req.flash("error", "The restaurant is fully booked at the chosen timing!");
                     res.redirect(url);
                     return;
                 }
-                var tid = res2.rows[0].tid;
-                client.query('Update tables set vacant=false where tables.tid=$1', [tid], function(err, res3) {
+                client.query('select now()::timestamptz(0)', function(err, res3) {
                     if(abort(err)) {
                         return;
                     }
-                    client.query('Update customers set rewardpt = rewardpt + 5 where uid=$1', [req.user.uid], function(err, res4) {
+                    var time = res3.rows[0].now
+                    client.query('Insert into reserves(uid, timestamp, guestcount) values ($1, $2, $3)', [req.user.uid, time, req.body.seats], function(err, res4) {
                         if(abort(err)) {
                             return;
                         }
-                        client.query('COMMIT', function(err, res5) {
+                        client.query('select reserveId from reserves r where r.timestamp=$1 and r.uid=$2', [time, req.user.uid], function(err, res5) {
                             if(abort(err)) {
                                 return;
                             }
-                            req.flash("success", "Successfully booked!")
-                            res.redirect("/")
-                            done();
+                            var reserveId = res5.rows[0].reserveid
+                            console.log(reserveId)
+                            var tid = res2.rows[0].tid;
+                            client.query('Update tables set vacant=false, reserveId=$1 where tables.tid=$2', [reserveId, tid], function(err, res6) {
+                                if(abort(err)) {
+                                    return;
+                                }
+                                client.query('Update customers set rewardpt = rewardpt + 5 where uid=$1', [req.user.uid], function(err, res7) {
+                                    if(abort(err)) {
+                                        return;
+                                    }
+                                    client.query('COMMIT', function(err, res5) {
+                                        if(abort(err)) {
+                                            return;
+                                        }
+                                        req.flash("success", "Successfully booked!")
+                                        res.redirect("/")
+                                        done();
+                                    })
+                                })
+                            });
                         })
                     })
-                });
+                    
+                })
             });
         });
     });
