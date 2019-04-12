@@ -15,12 +15,12 @@
                 <span><%= branchData[0].description%></span>
             </h6>
             <br \ />
-            <% if(branchData[0].file != 'No photos available!') {%> 
+            <% if(branchData[0].file !== 'No photos available!') {%>
                 <img src="<%= branchData[0].file%>" class="rouded col-6" />
             <%} %>
             <br/>
 
-            
+
             <% if(currentUser && currentUser.iscustomer) { %>
                 <h2 class="hdb col-6">Your Review</h2>
             <form
@@ -32,7 +32,7 @@
                 <div class="form-row">
 
                         <div class = "col-sm-2">
-                        
+
                                 <div class="form-group">
                                     <span class = "hdb col-4 mx-2" for="score" style="font-size: 2em">Score: </span>
                                         <select class="form-control col-6 mx-4" id="score" name ="score">
@@ -42,27 +42,27 @@
                                             <option>4</option>
                                             <option>5</option>
                                         </select>
-                                   
+
                                 </div>
-        
+
                                 <button type="submit" class="btn btn-primary col-md-6 mx-4">Post</button>
-        
+
                             </div>
                     <div class="form-group col-md-9">
-                        
+
                                 <label for="branch" >For which branch?</label>
                                 <select name="branch" id="branch" class="form-control my-2" required pattern="[A-Za-z0-9]{1,100}">
                                     <option></option>
-                                    <% for (var i = 0; i<branchData.length; i++) { %> 
+                                    <% for (var i = 0; i<branchData.length; i++) { %>
                                         <option>
                                             <%= branchData[i].location%>
                                         </option>
                                     <% } %>
-                                </select> 
+                                </select>
                                 <div class="invalid-feedback">
                                         Please select a branch!
                                 </div>
-                        
+
                         <textarea
                             class="form-control"
                             id="review"
@@ -77,9 +77,9 @@
                     </div>
 
 
-                    
+
                 </div>
-                
+
             </form>
             <% } %>
 
@@ -99,7 +99,7 @@
                                 <% var color = "#5eff3a"; if (ratingData[i].score<3) {color = "red"} %>
                                 <div class="badge text-wrap" style="font-size: 1em; width: 2em; background-color:  <%= color %>" >
                                         <%= ratingData[i].score %>
-                                </div> 
+                                </div>
                             </h5>
                             <h6
                                 class="mb-2 text text-muted"
@@ -112,7 +112,7 @@
                                 <%= ratingData[i].review%>
                             </p>
 
-                            <% if (currentUser && currentUser.isowner && ratingData[i].textresponse == "") { %> 
+                            <% if (currentUser && currentUser.isowner && ratingData[i].textresponse == "") { %>
                             <% } %>
                             <div class="col-12">
                                     <div class="card my-2">
@@ -120,7 +120,7 @@
                                             <h5 class="card-title">
                                                 <%= title%>'s response:
                                             </h5>
-                                            
+
                                             <p class="card-text my-1">
                                                 <h6
                                                     class="mb-2 text text-muted"
@@ -139,12 +139,12 @@
             </div>
 
             <% } %>
-            <% if (ratingData.length>3) { %> 
+            <% if (ratingData.length>3) { %>
                 <a href="/branches/ratings?rid=<%= branchData[0].rid%>&name=<%=title%>" class="btn btn-primary col-3 mx-3" > Show More </a>
             <% } %>
 
             <br/>
-            
+
             <h2 class="hdb col-6">Branch Locations</h2>
             <% for(var i =0; i<(branchData.length); i+=2) { %>
             <div class="row col-12">
@@ -168,9 +168,9 @@
                                 </button>
                             </div>
                         </div>
-                    </form>     
+                    </form>
                 </div>
-                <% if(i+1 < branchData.length) { %> 
+                <% if(i+1 < branchData.length) { %>
                     <div class="col-sm-6">
                         <form action="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>" method="post">
                             <input type="hidden" id="nameinput" name="name" value="<%= branchData[i+1].name%>"/>
@@ -193,7 +193,7 @@
                             </div>
                         </form>
                     </div>
-                <%} %> 
+                <%} %>
             </div>
             <%} %>
             <br />
