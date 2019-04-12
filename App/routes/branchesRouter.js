@@ -10,7 +10,7 @@ const pool = new Pool({
 /* ---- GET for show all details of particular restaurant branches ---- */
 router.get("/", function(req, res, next) {
     sql_query =
-        "select R.rid, B.bid, P.file, R.name, R.type, R.description, coalesce(B.pnumber, 'No contact number available!') as pnumber, B.address, B.location FROM Photos P natural join Restaurants R inner join Branches B on R.rid=B.rid and R.name=$1";
+        "select R.rid, B.bid, coalesce(P.file, 'No photos available!') as file, R.name, R.type, R.description, coalesce(B.pnumber, 'No contact number available!') as pnumber, B.address, B.location FROM Photos P right outer join Restaurants R on P.rid=R.rid inner join Branches B on R.rid=B.rid and R.name=$1";
     pool.query(sql_query, [req.query.name], function(err, branchData) {
         if (err) {
             console.log(err);
@@ -23,7 +23,6 @@ router.get("/", function(req, res, next) {
                 if (err) {
                     console.log(err);
                 }
-
                 res.render("restaurant/branches", {
                     title: req.query.name,
                     branchData: branchData.rows,

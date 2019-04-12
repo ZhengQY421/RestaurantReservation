@@ -15,9 +15,9 @@
                 <span><%= branchData[0].description%></span>
             </h6>
             <br \ />
-
-            <img src="<%= branchData[0].file%>" class="rouded col-6" />
-
+            <% if(branchData[0].file != 'No photos available!') {%> 
+                <img src="<%= branchData[0].file%>" class="rouded col-6" />
+            <%} %>
             <br/>
 
             
@@ -156,28 +156,30 @@
                         </div>
                     </form>     
                 </div>
-                <div class="col-sm-6">
-                    <form action="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>" method="post">
-                        <input type="hidden" id="nameinput" name="name" value="<%= branchData[i+1].name%>"/>
-                        <input type="hidden" id="addressinput" name="address" value="<%= branchData[i+1].address%>"/>
-                        <div class="card my-2 " style="height: 12em">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <%= branchData[i+1].location%>
-                                </h5>
-                                <p class="card-text my-1">
-                                    <%= branchData[i+1].address%>
-                                </p>
-                                <p class="card-text my-1">
-                                    Tel: <%= branchData[i+1].pnumber%>
-                                </p>
-                                <button class="btn btn-primary">
-                                    Reserve
-                                </button>
+                <% if(i+1 < branchData.length) { %> 
+                    <div class="col-sm-6">
+                        <form action="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>" method="post">
+                            <input type="hidden" id="nameinput" name="name" value="<%= branchData[i+1].name%>"/>
+                            <input type="hidden" id="addressinput" name="address" value="<%= branchData[i+1].address%>"/>
+                            <div class="card my-2 " style="height: 12em">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <%= branchData[i+1].location%>
+                                    </h5>
+                                    <p class="card-text my-1">
+                                        <%= branchData[i+1].address%>
+                                    </p>
+                                    <p class="card-text my-1">
+                                        Tel: <%= branchData[i+1].pnumber%>
+                                    </p>
+                                    <button class="btn btn-primary">
+                                        Reserve
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                </div>
+                        </form>
+                    </div>
+                <%} %> 
             </div>
             <%} %>
             <br />
