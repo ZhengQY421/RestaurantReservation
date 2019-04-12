@@ -15,11 +15,7 @@
                 <span><%= branchData[0].description%></span>
             </h6>
             <br \ />
-<<<<<<< HEAD
-            <% if(branchData[0].file !== 'No photos available!') {%>
-=======
             <% if(branchData[0].file != 'No photos available!') {%> 
->>>>>>> parent of f81ff07... here goes nothing
                 <img src="<%= branchData[0].file%>" class="rouded col-6" />
             <%} %>
             <br/>
@@ -152,16 +148,11 @@
 
             <h2 class="hdb col-6">Branch Locations</h2>
             <% for(var i =0; i<(branchData.length); i+=2) { %>
-<<<<<<< HEAD
-                <div class="row col-12">
-                    <div class="col-sm-5">
-=======
             <div class="row col-12">
                 <div class="col-sm-6">
                     <form action="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>" method="post">
                         <input type="hidden" id="nameinput" name="name" value="<%= branchData[i].name%>"/>
                         <input type="hidden" id="addressinput" name="address" value="<%= branchData[i].address%>"/>
->>>>>>> parent of f81ff07... here goes nothing
                         <div class="card my-2" style="height: 12em">
                             <div class="card-body">
                                 <h5 class="card-title">
@@ -173,19 +164,6 @@
                                 <p class="card-text my-1">
                                     Tel: <%= branchData[i].pnumber%>
                                 </p>
-<<<<<<< HEAD
-                                <a
-                                    href="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>"
-                                    class="btn btn-primary"
-                                    >Reserve</a
-                                >
-                            </div>
-                       
-                    </div>
-                </div>
-                <% if(branchData[i+1]) { %>
-                    <div class="col-sm-5">
-=======
                                 <button class="btn btn-primary">
                                     Reserve
                                 </button>
@@ -198,7 +176,6 @@
                         <form action="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>" method="post">
                             <input type="hidden" id="nameinput" name="name" value="<%= branchData[i+1].name%>"/>
                             <input type="hidden" id="addressinput" name="address" value="<%= branchData[i+1].address%>"/>
->>>>>>> parent of f81ff07... here goes nothing
                             <div class="card my-2 " style="height: 12em">
                                 <div class="card-body">
                                     <h5 class="card-title">
@@ -215,14 +192,9 @@
                                     </button>
                                 </div>
                             </div>
-<<<<<<< HEAD
-                    </div>
-                <%} %>
-=======
                         </form>
                     </div>
                 <%} %> 
->>>>>>> parent of f81ff07... here goes nothing
             </div>
 
 

@@ -17,10 +17,6 @@ router.get("/", function(req, res, next) {
         if (err) {
             console.log(err);
         }
-<<<<<<< HEAD
-=======
-        console.log(branchData)
->>>>>>> parent of f81ff07... here goes nothing
         pool.query(
             "select * from response right outer join ratings on response.rtid = ratings.rtid inner join users on users.uid = ratings.uid inner join gives on gives.rtid = ratings.rtid inner join branches on branches.bid = gives.bid and branches.rid = gives.rid where gives.rid = $1",
             [branchData.rows[0].rid],

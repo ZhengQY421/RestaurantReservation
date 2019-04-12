@@ -162,7 +162,6 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
 
         rating_query =
             "select u.name, count(rt.score), cast(avg(rt.score) as decimal(3,2)) from (ratings rt natural join customers c) inner join users u on c.uid=u.uid where u.uid=$1 group by (u.name)";
-
     } else {
         sql_query =
             "select * from Users where Users.uid = " + "'" + req.user.uid + "'";
@@ -199,39 +198,45 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
                     supportData: supportData.rows,
                     ratingData: ratingData.rows
                 });
-
             });
-
         });
     });
 });
 
 router.get("/reservation", checkLoggedIn, function(req, res, next) {
     if (req.user.iscustomer) {
-        pool.query("select r.reserveid, Res.name, b.address, t.time from reserves r inner join tables t on r.reserveid=t.reserveid and r.uid=$1 and r.timestamp >= (select current_date) inner join restaurants Res on t.rid=Res.rid inner join branches b on b.rid=Res.rid and t.bid=b.bid order by t.time, Res.name, b.address", [req.user.uid], function(err, data) {
-            if(err) {
-                return;
-            }
-            console.log(data.rows);
+        pool.query(
+            "select r.reserveid, Res.name, b.address, t.time from reserves r inner join tables t on r.reserveid=t.reserveid and r.uid=$1 and r.timestamp >= (select current_date) inner join restaurants Res on t.rid=Res.rid inner join branches b on b.rid=Res.rid and t.bid=b.bid order by t.time, Res.name, b.address",
+            [req.user.uid],
+            function(err, data) {
+                if (err) {
+                    return;
+                }
+                console.log(data.rows);
 
-            res.render("account/reservation", {
-                currentUser: req.user,
-                data: data.rows
-            });
-        })
+                res.render("account/reservation", {
+                    currentUser: req.user,
+                    data: data.rows
+                });
+            }
+        );
     } else {
-        pool.query("select reserves.reserveid, branches.location, users.name, tables.time, reserves.guestcount from restaurants natural join owners natural join branches natural join tables inner join reserves on tables.reserveid=reserves.reserveid inner join users on reserves.uid=users.uid where owners.uid=$1 and tables.vacant=false order by branches.location;", [req.user.uid], function(err, data) {
-            if(err) {
-                return;
-            }
-            console.log(data);
+        pool.query(
+            "select reserves.reserveid, branches.location, users.name, tables.time, reserves.guestcount from restaurants natural join owners natural join branches natural join tables inner join reserves on tables.reserveid=reserves.reserveid inner join users on reserves.uid=users.uid where owners.uid=$1 and tables.vacant=false order by branches.location;",
+            [req.user.uid],
+            function(err, data) {
+                if (err) {
+                    return;
+                }
+                console.log(data);
 
-            res.render("account/reservation", {
-                title: "Upcoming reservations",
-                currentUser: req.user,
-                data: data.rows
-            });
-        })
+                res.render("account/reservation", {
+                    title: "Upcoming reservations",
+                    currentUser: req.user,
+                    data: data.rows
+                });
+            }
+        );
     }
-})
+});
 module.exports = router;
