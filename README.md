@@ -1,7 +1,7 @@
 # Restaurant Reservation
 This web app allows diners to reserve spots at a restaurant branch in advance. Customers receive points for successful reservations, which they can redeem for incentives (such as a coupon for a certain restaurant). They can also leave reviews at restaurants.
 
-Restaurant branch owners can also use the web app to manage their restaurant information and respond to user reviews.
+Restaurant branch owners can also use the web app to manage their restaurant information and reservations.
 
 
 ## Getting Started

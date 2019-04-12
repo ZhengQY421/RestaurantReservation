@@ -435,8 +435,8 @@ INSERT INTO Response (timeStamp, rtid, rid, bid, textResponse) (select now()::ti
 INSERT INTO Response (timeStamp, rtid, rid, bid, textResponse) (select now()::timestamptz(0), 100008, 1000000, 9, 'The more the merrier...');
 INSERT INTO Response (timeStamp, rtid, rid, bid, textResponse) (select now()::timestamptz(0), 100009, 1000000, 8, 'Hey, what can we do to get the 5 from you?');
 
-INSERT INTO Photos (rid, caption, file) VALUES (1000000, 'Re-engineered full-range methodology', 'http://dummyimage.com/174x108.png/dddddd/000000');
-INSERT INTO Photos (rid, caption, file) VALUES (1000001, 'Realigned fresh-thinking portal', 'http://dummyimage.com/246x118.bmp/ff4444/ffffff');
+INSERT INTO Photos (rid, caption, file) VALUES (1000000, 'Re-engineered full-range methodology', 'http://www.putien.com/wp-content/uploads/2014/04/AX9A2904-1500-645x430.jpg');
+INSERT INTO Photos (rid, caption, file) VALUES (1000001, 'Realigned fresh-thinking portal', 'http://shopsinsg.com/wp-content/uploads/2016/10/itacho-sushi-restaurant-bugis-junction-singapore.jpg');
 INSERT INTO Photos (rid, caption, file) VALUES (1000002, 'Team-oriented homogeneous hierarchy', 'http://dummyimage.com/151x131.png/cc0000/ffffff');
 INSERT INTO Photos (rid, caption, file) VALUES (1000003, 'Focused heuristic utilisation', 'http://dummyimage.com/174x113.bmp/ff4444/ffffff');
 INSERT INTO Photos (rid, caption, file) VALUES (1000004, 'Diverse incremental contingency', 'http://dummyimage.com/196x185.jpg/ff4444/ffffff');
