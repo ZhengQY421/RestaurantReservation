@@ -4,72 +4,80 @@
         <!-- Header inclusion-->
         <%- include ../template/header.ejs %>
     </head>
-    <body style="background-color: #fcfffd;">
+    <body class="bg">
         <%- include ../template/navbar.ejs %>
         <br \ />
 
-        <div class="container col-6">
-            <h1 class="hdb" style="font-size: 3em;">
-                <%= currentUser.name %>'s Profile
-            </h1>
-
-            <div class="card col">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-6">
-                            <h5><b>Name:</b><br \ /><%= userData[0].name%></h5>
-                        </div>
-                        <div class="col-6">
-                            <h5>
-                                <b>E-mail:</b><br \ />
-                                <%=userData[0].email%>
-                            </h5>
-                        </div>
+        <div class="card col-6 mx-auto" style="background-color: #fcfffd;">
+            <div class="card-body">
+                <h2 class="hdb" style="font-size: 2.5em;">Profile</h2>
+                <div class="row">
+                    <div class="col-6">
+                        <h5><b>Name:</b><br \ /><%= userData[0].name%></h5>
                     </div>
-                    <br \ />
-                    <div class="row">
-                        <% if (currentUser.iscustomer) { %>
-                        <div class="col-6">
-                            <h5>
-                                <b>Address:</b><br \ />
-                                <%=userData[0].address%>
-                            </h5>
-                        </div>
-                        <div class="col-6">
-                            <h5>
-                                <b>Phone Number:</b><br \ />
-                                <%=userData[0].pnumber%>
-                            </h5>
-                        </div>
-                        <% } %>
+                    <div class="col-6">
+                        <h5>
+                            <b>E-mail:</b><br \ />
+                            <%=userData[0].email%>
+                        </h5>
                     </div>
                 </div>
-            </div>
-
-            <% if (currentUser.iscustomer) { %>
-            <h2 class="hdb" style="font-size: 3em;">
-                Rewards
-            </h2>
-            <div class="card col">
-                <div class="card-body">
-                    <% if (incentiveData.length == 0) { %> 
-                        You don't have any rewards! Go buy some from the rewards store! 
-                    <% } else { %>
-
-                        <% for(var i=0; i<incentiveData.length; i++) { %> 
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title"><%= incentiveData[i].incentivename%></h5>
-                                    <h6 class="card-subtitle mb-2 text-muted"><%= incentiveData[i].description%></h6>
+                <% if (currentUser.iscustomer) { %>
+                <br \ />
+                <div class="row">
+                    <div class="col-6">
+                        <h5>
+                            <b>Address:</b><br \ />
+                            <%=userData[0].address%>
+                        </h5>
+                    </div>
+                    <div class="col-6">
+                        <h5>
+                            <b>Phone Number:</b><br \ />
+                            <%=userData[0].pnumber%>
+                        </h5>
+                    </div>
+                </div>
+                <% } %>
+                <br />
+                <% if (currentUser.iscustomer) { %>
+                    <h2 class="hdb" style="font-size: 2.5em;">
+                        Rewards
+                    </h2>
+                    <div class="card col">
+                        <div class="card-body">
+                            <% if (supportData.length == 0) { %> 
+                                You don't have any rewards! Go buy some from the rewards store! 
+                            <% } else { %>
+        
+                                <% for(var i=0; i<supportData.length; i++) { %> 
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><%= supportData[i].incentivename%></h5>
+                                            <h6 class="card-subtitle mb-2 text-muted"><%= supportData[i].description%></h6>
+                                        </div>
+                                    </div>
+                                    <br \>
+                                <% }%>
+                                        
+                            <% } %>
+                        </div>
+                    </div>
+                    <% } else { %> 
+                        <h2 class="hdb" style="font-size: 2.5em;">
+                                Restaurant & Branches
+                        </h2>
+        
+                        <% for(var i=0; i<supportData.length; i++) { %> 
+                                <div class="card">
+                                    <div class="card-body">
+                                        <a class="card-title" style="font-size: 1.25em" href="/branches?name=<%= supportData[i].name%>"><b><%= supportData[i].name%> (<%= supportData[i].location %>)</b></a>
+                                    </div>
                                 </div>
-                            </div>
-                            <br \>
+                                <br \>
                         <% }%>
-                                
                     <% } %>
-                </div>
             </div>
-            <% } %>
         </div>
     </body>
 </html>

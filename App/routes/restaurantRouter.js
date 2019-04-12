@@ -87,6 +87,7 @@ router.post("/add", function(req, res, next) {
                     "Insert into Restaurants(name, type, description) values ($1, $2, $3)",
                     [req.body.resName, req.body.resType, req.body.cusType],
                     function(err, data) {
+                        console.log(req.body.resName);
                         insertBranch(req, res);
                     }
                 );

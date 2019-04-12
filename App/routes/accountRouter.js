@@ -147,6 +147,7 @@ router.post("/addOwner", checkLoggedOut, function(req, res, next) {
 /* ---- GET for profile ---- */
 router.get("/profile", checkLoggedIn, function(req, res, next) {
     var sql_query = "";
+    var sup_query = "";
 
     if (req.user.iscustomer) {
         sql_query =
@@ -154,12 +155,15 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
             "'" +
             req.user.uid +
             "'";
+
+        sup_query =
+            "select * from choose C natural join Incentives i where C.uid=$1";
     } else {
         sql_query =
-            "select * from Users natural join Owners where Users.uid = " +
-            "'" +
-            req.user.uid +
-            "'";
+            "select * from Users where Users.uid = " + "'" + req.user.uid + "'";
+
+        sup_query =
+            "select * from Owners natural join branches natural join restaurants where uid = $1";
     }
 
     pool.query(sql_query, (err, userData) => {
@@ -168,25 +172,21 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
             return;
         }
 
-        pool.query(
-            "select * from choose C natural join Incentives i where C.uid=$1",
-            [req.user.uid],
-            function(err, incentiveData) {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-
-                console.log(incentiveData);
-
-                res.render("account/profile", {
-                    title: "User Profile",
-                    currentUser: req.user,
-                    userData: userData.rows,
-                    incentiveData: incentiveData.rows
-                });
+        pool.query(sup_query, [req.user.uid], function(err, supportData) {
+            if (err) {
+                console.log(err);
+                return;
             }
-        );
+
+            console.log(supportData);
+
+            res.render("account/profile", {
+                title: "User Profile",
+                currentUser: req.user,
+                userData: userData.rows,
+                supportData: supportData.rows
+            });
+        });
     });
 });
 

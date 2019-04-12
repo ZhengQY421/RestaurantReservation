@@ -6,20 +6,146 @@
     </head>
     <body class="bg">
         <%- include ../template/navbar.ejs %>
-        <br \>
-        <h1 class="hd" style="font-size: 3em;" ><%= title %></h1>
-        <br \>
-        <% for(var i =0; i<data.length; i++) { %>
-            <a href="/reservation?name=<%= data[i].name%>&address=<%= data[i].address%>" class="card-link" style="color: #000">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title" style="font-weight: bold; font-size: 25px;"><%= data[i].location%></h5>
-                        <h6 class="card-subtitle mb-2 text-muted"><%= data[i].address%></h6>
-                        <p class="card-text"><%= data[i].pnumber%></p>
+        <br \ />
+        <div class="card col-10 mx-auto" style="background-color: #fcfffd;">
+            <br \ />
+            <h1 class="hdb" style="font-size: 3em;"><%= title %></h1>
+            <h6 class="mb-2 text" style="display: inline">
+                <b><%= branchData[0].type%></b> |
+                <span><%= branchData[0].description%></span>
+            </h6>
+            <br \ />
+
+            <img src="<%= branchData[0].file%>" class="rouded col-6" />
+
+            <br/>
+
+            <h2 class="hdb col-6">Ratings</h2>
+            <% if(currentUser && currentUser.iscustomer) { %>
+            <form
+                action="/restaurant/addReview"
+                method="post"
+                class="needs-validation mx-3"
+                novalidate
+            >
+                <div class="form-row">
+                    <div class="form-group col-md-9">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="review"
+                            name="review"
+                            placeholder="Been here? Liked it? Diskliked it? Leave a review!"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Field cannot be left blank
+                        </div>
                     </div>
                 </div>
-                <br \>
-            </a>
-        <%} %>
+                <button type="submit" class="btn btn-primary">Post</button>
+            </form>
+            <% } %>
+
+            <% for (var i =0; i<Math.min(3, ratingData.length); i++) { %>
+
+            <div class="row col-12">
+                <div class="col-10">
+                    <div class="card my-2">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= ratingData[i].name%>: <%= ratingData[i].score %>
+                            </h5>
+                            <h6
+                                class="mb-2 text text-muted"
+                                style="display: inline"
+                            >
+                                <b><%= ratingData[i].location%></b> |
+                                <span><%= ratingData[i].timestamp%></span>
+                            </h6>
+                            <p class="card-text my-1">
+                                <%= ratingData[i].review%>
+                            </p>
+
+                            <% if (currentUser && currentUser.isowner && ratingData[i].textresponse == "") { %> 
+                            <% } %>
+                            <div class="col-12">
+                                    <div class="card my-2">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <%= title%>'s response:
+                                            </h5>
+                                            <h6
+                                                class="mb-2 text text-muted"
+                                                style="display: inline"
+                                            >
+                                                <span><%= ratingData[i].timestamp%></span>
+                                            </h6>
+                                            <p class="card-text my-1">
+                                                <%= ratingData[i].textresponse%>
+                                            </p>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <% } %>
+            <% if (ratingData.length>3) { %> 
+                <a href="/branches/ratings?rid=<%= branchData[0].rid%>&name=<%=title%>" class="btn btn-primary col-3 mx-3" > Show More </a>
+            <% } %>
+
+            <br/>
+            
+            <h2 class="hdb col-6">Branch Locations</h2>
+            <% for(var i =0; i<(branchData.length); i+=2) { %>
+            <div class="row col-12">
+                <div class="col-sm-6">
+                    <div class="card my-2" style="height: 12em">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= branchData[i].location%>
+                            </h5>
+                            <p class="card-text my-1">
+                                <%= branchData[i].address%>
+                            </p>
+                            <p class="card-text my-1">
+                                Tel: <%= branchData[i].pnumber%>
+                            </p>
+                            <a
+                                href="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>"
+                                class="btn btn-primary"
+                                >Reserve</a
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card my-2 " style="height: 12em">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= branchData[i+1].location%>
+                            </h5>
+                            <p class="card-text my-1">
+                                <%= branchData[i+1].address%>
+                            </p>
+                            <p class="card-text my-1">
+                                Tel: <%= branchData[i+1].pnumber%>
+                            </p>
+                            <a
+                                href="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>"
+                                class="btn btn-primary"
+                            >
+                                Reserve
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <%} %>
+            <br />
+        </div>
     </body>
 </html>
