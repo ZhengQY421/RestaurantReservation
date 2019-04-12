@@ -29,12 +29,25 @@ router.get("/", function(req, res, next) {
                     "select avg(rt.score) from (restaurants r inner join branches b on r.rid = b.rid inner join gives g on g.bid = b.bid inner join ratings rt on rt.rtid = g.rtid) where r.name = $1",
                     [req.query.name],
                     function(err, avgscore) {
-                        res.render("restaurant/branches", {
-                            title: req.query.name,
-                            branchData: branchData.rows,
-                            ratingData: ratingData.rows,
-                            currentUser: req.user,
-                            avg: avgscore.rows[0].avg
+                        sql_query =
+                            "select distinct time from Tables T order by time";
+                        pool.query(sql_query, function(err, time) {
+                            if (err) {
+                                return;
+                            }
+                            sql_query =
+                                "select distinct seats from Tables T order by seats";
+                            pool.query(sql_query, function(err, seats) {
+                                res.render("restaurant/branches", {
+                                    title: req.query.name,
+                                    branchData: branchData.rows,
+                                    ratingData: ratingData.rows,
+                                    currentUser: req.user,
+                                    avg: avgscore.rows[0].avg,
+                                    time: time.rows,
+                                    data: seats.rows
+                                });
+                            });
                         });
                     }
                 );

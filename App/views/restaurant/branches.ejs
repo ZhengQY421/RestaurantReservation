@@ -20,14 +20,84 @@
                             <%= avg.slice(0,4)%>
                     </div>
             </h6>
-            <br \ />
-            <% if(branchData[0].file != 'No photos available!') {%> 
-                <img src="<%= branchData[0].file%>" class="rouded col-6" />
-            <%} %>
-            <br/>
+            <div class="row" style="height: 25em">
+                    <br \ />
+                    <% if(branchData[0].file != 'No photos available!') {%> 
+                        <img src="<%= branchData[0].file%>" class="rouded col-6" />
+                    <%} else {%>
+                        <img src="https://causeofaction.org/wp-content/uploads/2013/09/Not-available.gif" class="rouded col-6" />
+                    <%} %>
+
+                    <% var d = "disabled" %>
+
+                    <% if (currentUser && currentUser.iscustomer) { %> 
+                        <% d = "" %>
+                    <% } %>
+
+                    
+                    
+                    <form class="col-5" action = "/reservation/submit" method ="post" class="needs-validation" novalidate>
+                        <input type="hidden" id="nameinput" name="name" value="<%= title%>"/>
+                        <h2 class="hdb">Reserve</h2>
+
+                        <div class="form-group">
+
+                                <label for="reserveBranch" >From which branch?</label>
+                                <select name="reserveBranch" id="reserveBranch" class="form-control my-2 col-11" required pattern="[A-Za-z0-9]{1,100}" <%= d %>>
+                                        <option></option>
+                                        <% for (var i = 0; i<branchData.length; i++) { %>
+                                            <option>
+                                                <%= branchData[i].location%>
+                                            </option>
+                                        <% } %>
+                                </select>
+
+                                <br/>
+    
+                                <div class="form-row ">
+                                        <div class="input-group col-5">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-time">Time</span>
+                                                </div>
+                                                <select name="time" id="time" class="form-control" required pattern="[A-Za-z0-9]{1,100}" <%= d %> >
+                                                    <% for(var i =0; i<time.length; i++) { %>
+                                                        <option><%= time[i].time%></option>
+                                                    <%} %>
+                                                </select> 
+                                        </div>
+
+                                        <div class="col-1"></div>
+            
+                                        <div class="input-group col-5">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-time">Number of Guests</span>
+                                                </div>
+                                                <select name="seats" id="seats" class="form-control" required pattern="[A-Za-z0-9]{1,100}" <%= d %>>
+                                                    <% for(var i =0; i<data.length; i++) { %>
+                                                        <option><%= data[i].seats%></option>
+                                                    <%} %>
+                                                </select> 
+                                        </div>
+                                </div>
+                                <br/>
+                                <br/>
+                                
+                            <button type="submit" class="btn btn-primary mx-2"  <%= d %>>Reserve</button>
+                            </div>
+
+                        
+                        
+                      </form>
+                    <br/>
+            </div>
+
+                    
 
 
+
+            
             <% if(currentUser && currentUser.iscustomer) { %>
+                <br/>
                 <h2 class="hdb col-6">Your Review</h2>
             <form
                 action="/branches/addReview?rid=<%= branchData[0].rid%>&name=<%= branchData[0].name %>"
@@ -159,7 +229,7 @@
                     <form action="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>" method="post">
                         <input type="hidden" id="nameinput" name="name" value="<%= branchData[i].name%>"/>
                         <input type="hidden" id="addressinput" name="address" value="<%= branchData[i].address%>"/>
-                        <div class="card my-2" style="height: 12em">
+                        <div class="card my-2" style="height: 8em">
                             <div class="card-body">
                                 <h5 class="card-title">
                                     <%= branchData[i].location%>
@@ -170,9 +240,6 @@
                                 <p class="card-text my-1">
                                     Tel: <%= branchData[i].pnumber%>
                                 </p>
-                                <button class="btn btn-primary">
-                                    Reserve
-                                </button>
                             </div>
                         </div>
                     </form>     
@@ -182,7 +249,7 @@
                         <form action="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>" method="post">
                             <input type="hidden" id="nameinput" name="name" value="<%= branchData[i+1].name%>"/>
                             <input type="hidden" id="addressinput" name="address" value="<%= branchData[i+1].address%>"/>
-                            <div class="card my-2 " style="height: 12em">
+                            <div class="card my-2 " style="height: 8em">
                                 <div class="card-body">
                                     <h5 class="card-title">
                                         <%= branchData[i+1].location%>
@@ -193,9 +260,6 @@
                                     <p class="card-text my-1">
                                         Tel: <%= branchData[i+1].pnumber%>
                                     </p>
-                                    <button class="btn btn-primary">
-                                        Reserve
-                                    </button>
                                 </div>
                             </div>
                         </form>
