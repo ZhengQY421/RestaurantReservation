@@ -5,7 +5,7 @@ Restaurant branch owners can also use the web app to manage their restaurant inf
 
 
 ## Getting Started
-You will need to have NodeJS and PostgreSQL installed to run our application. To launch our web page from the command line, navigate to the App directory and run the server using `node bin\www`.
+You will need to have NodeJS and PostgreSQL installed to run our application. To launch our web page from the command line, navigate to the App directory and run the server using `npm start`.
 
 ## Built With
 * [NodeJS](https://nodejs.org/api/)
