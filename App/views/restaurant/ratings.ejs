@@ -17,7 +17,11 @@
                         <div class="card my-2">
                             <div class="card-body">
                                 <h5 class="card-title">
-                                    <%= data[i].name%>: <%= data[i].score %>
+                                    <%= data[i].name%>
+                                    <% var color = "#5eff3a"; if (data[i].score<3) {color = "red"} %>
+                                    <div class="badge text-wrap" style="font-size: 1em; width: 2em; background-color:  <%= color %>" >
+                                        <%= data[i].score %>
+                                    </div> 
                                 </h5>
                                 <h6
                                     class="mb-2 text text-muted"

@@ -54,4 +54,28 @@ router.get("/ratings", function(req, res, next) {
     );
 });
 
+router.post("/addReview", function(req, res, next) {
+    pool.query(
+        "insert into ratings values ($1, $2, $3)",
+        [req.user.uid, req.body.score, req.body.review],
+        function(err, data) {
+            console.log(
+                req.user.uid + " " + req.body.score + " " + req.body.review
+            );
+
+            if (err) {
+                console.log(err);
+            }
+
+            timeStamp, uid, rtid, rid, bid;
+
+            pool.query(
+                "insert into gives values" +
+                    "(select now()::timestamptz(0)," +
+                    " $1, (select R.rtid from Ratings R where R.review=$2),"
+            );
+        }
+    );
+});
+
 module.exports = router;
