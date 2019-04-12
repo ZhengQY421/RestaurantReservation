@@ -15,9 +15,9 @@
                 <span><%= branchData[0].description%></span>
             </h6>
             <br \ />
-            <% if(branchData[0].file != 'No photos available!') {%> 
-                <img src="<%= branchData[0].file%>" class="rouded col-6" />
-            <%} %>
+
+            <img src="<%= branchData[0].file%>" class="rouded col-6" />
+
             <br/>
 
             
@@ -149,32 +149,27 @@
             <% for(var i =0; i<(branchData.length); i+=2) { %>
             <div class="row col-12">
                 <div class="col-sm-6">
-                    <form action="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>" method="post">
-                        <input type="hidden" id="nameinput" name="name" value="<%= branchData[i].name%>"/>
-                        <input type="hidden" id="addressinput" name="address" value="<%= branchData[i].address%>"/>
-                        <div class="card my-2" style="height: 12em">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <%= branchData[i].location%>
-                                </h5>
-                                <p class="card-text my-1">
-                                    <%= branchData[i].address%>
-                                </p>
-                                <p class="card-text my-1">
-                                    Tel: <%= branchData[i].pnumber%>
-                                </p>
-                                <button class="btn btn-primary">
-                                    Reserve
-                                </button>
-                            </div>
+                    <div class="card my-2" style="height: 12em">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= branchData[i].location%>
+                            </h5>
+                            <p class="card-text my-1">
+                                <%= branchData[i].address%>
+                            </p>
+                            <p class="card-text my-1">
+                                Tel: <%= branchData[i].pnumber%>
+                            </p>
+                            <a
+                                href="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>"
+                                class="btn btn-primary"
+                                >Reserve</a
+                            >
                         </div>
-                    </form>     
+                    </div>
                 </div>
-                <% if(i+1 < branchData.length) { %> 
+                <% if (branchData[i+1]) { %> 
                     <div class="col-sm-6">
-                        <form action="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>" method="post">
-                            <input type="hidden" id="nameinput" name="name" value="<%= branchData[i+1].name%>"/>
-                            <input type="hidden" id="addressinput" name="address" value="<%= branchData[i+1].address%>"/>
                             <div class="card my-2 " style="height: 12em">
                                 <div class="card-body">
                                     <h5 class="card-title">
@@ -186,14 +181,17 @@
                                     <p class="card-text my-1">
                                         Tel: <%= branchData[i+1].pnumber%>
                                     </p>
-                                    <button class="btn btn-primary">
+                                    <a
+                                        href="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>"
+                                        class="btn btn-primary"
+                                    >
                                         Reserve
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                <%} %> 
+                        </div>
+                <% } %>
+                
             </div>
             <%} %>
             <br />
