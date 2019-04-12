@@ -8,50 +8,36 @@ const pool = new Pool({
 	connectionString: process.env.DATABASE_URL
 });
 
-pool.query = util.promisify(pool.query);
-
 const {
     checkLoggedIn,
     checkLoggedOut,
 } = require("./middleware/auth");
 
 /* ---- GET/POST for reserve ---- */
-router.all('/', checkLoggedIn, async function(req, res, next){
+router.all('/', checkLoggedIn, function(req, res, next){
     var sql_query;
-    var results;
     if (req.user.iscustomer){
-        try{
-            sql_query = "select R.rid, B.bid from Restaurants R natural join Branches B where R.name=$1 and B.address=$2";
-            results = await pool.query(sql_query, [req.query.name, req.query.address]);
-        } catch(err) {
-            throw new Error(err)
-        }
-        if(results){
-            var time;
-            try{
-                sql_query = "select distinct time from Tables T where T.rid=$1 and T.bid=$2 order by time";
-                time = await pool.query(sql_query, [results.rows[0].rid, results.rows[0].bid]);
-            } catch(err) {
-                throw new Error(err)
+        sql_query = "select distinct time from Tables T order by time";
+        pool.query(sql_query, function(err, time){
+            if(err) {
+                return;
             }
-            
-            sql_query = "select distinct seats from Tables T where T.rid=$1 and T.bid=$2 order by seats";
-            pool.query(sql_query, [results.rows[0].rid, results.rows[0].bid], function(err, data) {
+            sql_query = "select distinct seats from Tables T order by seats";
+            pool.query(sql_query, function(err, seats) {
                 if (err){
                     console.log(err);
                     return;
                 }
-            res.render('restaurant/reservation', {
-
-                title: 'Reservation Selection',
-                currentUser: req.user,
-                name: req.query.name,
-                address: req.query.address,
-                time: time.rows,
-                data: data.rows
+                console.log(req.body)
+                res.render('restaurant/reservation', {
+                    title: 'Reservation Selection',
+                    currentUser: req.user,
+                    req: req.body,
+                    time: time.rows,
+                    data: seats.rows
                 });
             });
-        }
+        });    
     } else {
         req.flash("error", "Owners are not allowed to make reservations!");
         res.redirect("/");
@@ -70,18 +56,44 @@ router.post('/submit', checkLoggedIn, function(req, res, next){
             }
             return false;
         }
+        function redirect(user, body) {
+            client.query('ROLLBACK', function(err) {
+                sql_query = "select distinct time from Tables T order by time";
+                client.query(sql_query, function(err, time){
+                    if(err) {
+                        return;
+                    }
+                    sql_query = "select distinct seats from Tables T order by seats";
+                    client.query(sql_query, function(err, seats) {
+                        if (err){
+                            console.log(err);
+                            return;
+                        }
+                        console.log(req.body)
+                        req.flash("error", "The restaurant is fully booked at the chosen timing!");
+                        res.render('restaurant/reservation', {
+                            title: 'Reservation Selection',
+                            currentUser: user,
+                            req: body,
+                            time: time.rows,
+                            data: seats.rows
+                        });
+                    });
+                });
+            });
+
+        }
         client.query('BEGIN', function(err, res1) {
             if(abort(err)) {
                 return;
             }
-            client.query('select t.tid from restaurants r inner join branches b on r.rid=b.rid inner join tables t on r.rid=t.rid and b.bid=t.bid where r.name=$1 and b.address=$2 and t.time=$3 and t.seats>=$4 and t.vacant=true', [req.query.name, req.query.address, req.body.time, req.body.seats], function(err, res2) {
+            console.log(req.body)
+            client.query('select t.tid from restaurants r inner join branches b on r.rid=b.rid inner join tables t on r.rid=t.rid and b.bid=t.bid where r.name=$1 and b.address=$2 and t.time=$3 and t.seats>=$4 and t.vacant=true', [req.body.name, req.body.address, req.body.time, req.body.seats], function(err, res2) {
                 if(abort(err)) {
                     return;
                 }
                 if(!res2.rows.length) {
-                    var url = "/reservation?name=" + req.query.name +"&address="+ req.query.address;
-                    req.flash("error", "The restaurant is fully booked at the chosen timing!");
-                    res.redirect(url);
+                    redirect(req.user, req.body)
                     return;
                 }
                 client.query('select now()::timestamptz(0)', function(err, res3) {
@@ -104,18 +116,13 @@ router.post('/submit', checkLoggedIn, function(req, res, next){
                                 if(abort(err)) {
                                     return;
                                 }
-                                client.query('Update customers set rewardpt = rewardpt + 5 where uid=$1', [req.user.uid], function(err, res7) {
+                                client.query('COMMIT', function(err, res5) {
                                     if(abort(err)) {
                                         return;
                                     }
-                                    client.query('COMMIT', function(err, res5) {
-                                        if(abort(err)) {
-                                            return;
-                                        }
-                                        req.flash("success", "Successfully booked!")
-                                        res.redirect("/")
-                                        done();
-                                    })
+                                    req.flash("success", "Successfully booked!")
+                                    res.redirect("/")
+                                    done();
                                 })
                             });
                         })
@@ -127,5 +134,43 @@ router.post('/submit', checkLoggedIn, function(req, res, next){
     });
 });
 
+router.post("/cancel", checkLoggedIn, function(req, res,next) {
+    
+        pool.connect(function(err, client, done) {
+            function abort(err) {
+                if(err) {
+                    client.query('ROLLBACK', function(err) {
+                        done();
+                    });
+                    return true;
+                }
+                return false;
+            }
+            client.query("BEGIN", function(err, res1) {
+                if(abort(err)) {
+                    return;
+                }
+                client.query("Update tables set vacant=true, reserveid=null where reserveid=$1", [req.body.reserveid], function(err, res2) {
+                    if(abort(err)) {
+                        return;
+                    }
+                    client.query("delete from reserves where reserveid=$1", [req.body.reserveid], function(err, res3) {
+                        if(abort(err)) {
+                            return;
+                        }
+                        client.query("COMMIT", function(err, res4){
+                            if(abort(err)) {
+                                return;
+                            }
+                            req.flash("success", "Reservation has been cancelled!")
+                            res.redirect("/account/reservation")
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    
+})
 module.exports = router;
 

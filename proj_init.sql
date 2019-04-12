@@ -206,6 +206,7 @@ ALTER SEQUENCE photos_pid_seq restart with 10000000;
 
 create table Reserves (
     reserveId       SERIAL,
+    uid             INT NOT NULL,
     timeStamp       TIMESTAMPTZ NOT NULL,
     guestCount      INT NOT NULL CHECK(guestCount > 0),
     PRIMARY KEY (reserveId)
@@ -221,7 +222,7 @@ create table Tables (
     seats           INT NOT NULL CHECK(seats > 0),
     PRIMARY KEY (tid, time),
     FOREIGN KEY (reserveId) references Reserves (reserveId),
-    FOREIGN KEY (rid, bid) references Branches (rid, bid)
+    FOREIGN KEY (rid, bid) references Branches (rid, bid) on delete cascade
 );
 
 create or replace view accountTypes (uid, isCustomer, isOwner) as
@@ -398,7 +399,7 @@ insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select
 insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Bruise Wayne'), (select I.iid from Incentives I WHERE I.incentivename='Spill-Free Tumbler'));
 insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Baby Max'), (select I.iid from Incentives I WHERE I.incentivename='Portable Charger'));
 insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Captain America'), (select I.iid from Incentives I WHERE I.incentivename='Giant teddy bear'));
-insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Pikachu'), (select I.iid from Incentives I WHERE I.incentivename='Haidilao dinner promotion'));
+insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Pikachu Pie'), (select I.iid from Incentives I WHERE I.incentivename='Haidilao dinner promotion'));
 insert into Choose (timeStamp, uid, iid) (select  now()::timestamptz(0), (select U.uid from Users U where U.name='Ash Ketchup'), (select I.iid from Incentives I WHERE I.incentivename='Itacho Sushi 10th Year Anniversary Special'));
 
 INSERT INTO Ratings (uid, score, review) VALUES (21, 5, 'Cras mi pede, malesuada in, imperdiet et, commodo vulputate, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu, adipiscing molestie, hendrerit at, vulputate vitae, nisl.');
@@ -445,26 +446,26 @@ INSERT INTO Photos (rid, caption, file) VALUES (1000007, 'Fully-configurable act
 INSERT INTO Photos (rid, caption, file) VALUES (1000008, 'Multi-channelled homogeneous secured line', 'http://dummyimage.com/230x144.png/ff4444/ffffff');
 INSERT INTO Photos (rid, caption, file) VALUES (1000009, 'Centralized dedicated throughput', 'http://dummyimage.com/174x242.bmp/dddddd/000000');
 
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 2);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 4);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 6);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
-INSERT INTO Reserves(timeStamp, guestCount) (select now()::timestamptz(0), 3);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 6, 2);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 7, 2);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 8, 2);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 9, 2);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 13, 2);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 14, 4);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 16, 4);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 19, 4);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 20, 4);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 21, 4);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 13, 6);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 6, 6);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 7, 6);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 8, 6);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 9, 6);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 14, 3);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 16, 3);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 19, 3);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 20, 3);
+INSERT INTO Reserves(timeStamp, uid, guestCount) (select now()::timestamptz(0), 21, 3);
 
 INSERT INTO TABLES(time, rid, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000, 1, 1, False, 2);
 INSERT INTO TABLES(time, rid, bid, reserveId, vacant, seats) VALUES ('10AM', 1000000, 1, NULL, True, 4);
