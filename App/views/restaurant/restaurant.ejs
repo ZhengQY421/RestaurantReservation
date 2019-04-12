@@ -10,13 +10,12 @@
         <h1 class="hd" style="font-size: 3em;" ><%= title %></h1>
         <br \>
         <% for(var i =0; i<data.length; i++) { %>
-                <a href="/restaurant/branches?name=<%= data[i].name%>" style="color: #000" class="card-link">
+                <a href="/branches?name=<%= data[i].name%>" style="color: #000" class="card-link">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title" style="font-weight: bold; font-size: 25px;"><%= data[i].name%></h5>
                             <h6 class="card-subtitle mb-2 text-muted"><%= data[i].type%></h6>
                             <p class="card-text" style="font-size: 15px""><%= data[i].description%></p>
-                            <!--<a href="/branches?name=<%= data[i].name%>" class="card-link">Reserve</a>-->
                         </div>
                     </div>
                 </a>

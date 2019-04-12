@@ -20,48 +20,79 @@
 
             <br/>
 
-            <h2 class="hdb col-6">Ratings</h2>
+            
             <% if(currentUser && currentUser.iscustomer) { %>
+                <h2 class="hdb col-6">Your Review</h2>
             <form
-                action="/restaurant/addReview"
+                action="/branches/addReview"
                 method="post"
-                class="needs-validation mx-3"
+                class="needs-validation"
                 novalidate
             >
                 <div class="form-row">
+
+                        <div class = "col-sm-2">
+                        
+                                <div class="form-group">
+                                    <span class = "hdb col-4 mx-2" for="score" style="font-size: 2em">Score: </span>
+                                        <select class="form-control col-6 mx-4" id="score" name ="score">
+                                            <option>1</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                        </select>
+                                   
+                                </div>
+        
+                                <button type="submit" class="btn btn-primary col-md-6 mx-4">Post</button>
+        
+                            </div>
                     <div class="form-group col-md-9">
-                        <input
-                            type="text"
+                        <textarea
                             class="form-control"
                             id="review"
                             name="review"
-                            placeholder="Been here? Liked it? Diskliked it? Leave a review!"
+                            placeholder="Been here? Liked it? Disliked it? Leave a review!"
+                            style="height:10em"
                             required
-                        />
+                        ></textarea>
                         <div class="invalid-feedback">
                             Field cannot be left blank
                         </div>
                     </div>
+
+
+                    
                 </div>
-                <button type="submit" class="btn btn-primary">Post</button>
+                
             </form>
             <% } %>
+
+            <br/>
+
+            <h2 class="hdb col-6">Ratings</h2>
 
             <% for (var i =0; i<Math.min(3, ratingData.length); i++) { %>
 
             <div class="row col-12">
-                <div class="col-10">
+                <div class="col-12">
                     <div class="card my-2">
                         <div class="card-body">
                             <h5 class="card-title">
-                                <%= ratingData[i].name%>: <%= ratingData[i].score %>
+                                <%= ratingData[i].name%>
+
+                                <% var color = "#5eff3a"; if (ratingData[i].score<3) {color = "red"} %>
+                                <div class="badge text-wrap" style="font-size: 1em; width: 2em; background-color:  <%= color %>" >
+                                        <%= ratingData[i].score %>
+                                </div> 
                             </h5>
                             <h6
                                 class="mb-2 text text-muted"
                                 style="display: inline"
                             >
                                 <b><%= ratingData[i].location%></b> |
-                                <span><%= ratingData[i].timestamp%></span>
+                                <span><% var time = JSON.stringify(ratingData[i].timestamp);%><%= time.slice(1, time.indexOf("T"));%></span>
                             </h6>
                             <p class="card-text my-1">
                                 <%= ratingData[i].review%>
@@ -75,13 +106,14 @@
                                             <h5 class="card-title">
                                                 <%= title%>'s response:
                                             </h5>
-                                            <h6
-                                                class="mb-2 text text-muted"
-                                                style="display: inline"
-                                            >
-                                                <span><%= ratingData[i].timestamp%></span>
-                                            </h6>
+                                            
                                             <p class="card-text my-1">
+                                                <h6
+                                                    class="mb-2 text text-muted"
+                                                    style="display: inline"
+                                                >
+                                                <span><% var time = JSON.stringify(ratingData[i].timestamp);%><%= time.slice(1, time.indexOf("T"));%>:</span>
+                                                </h6>
                                                 <%= ratingData[i].textresponse%>
                                             </p>
                                         </div>
