@@ -15,7 +15,7 @@ router.get("/", function(req, res, next) {
         if (err) {
             console.log(err);
         }
-
+        console.log(branchData)
         pool.query(
             "select * from gives G natural join ratings RT natural join response R natural join Users U natural join branches where G.rid = $1",
             [branchData.rows[0].rid],

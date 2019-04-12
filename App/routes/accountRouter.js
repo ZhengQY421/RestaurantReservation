@@ -192,7 +192,7 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
 
 router.get("/reservation", checkLoggedIn, function(req, res, next) {
     if (req.user.iscustomer) {
-        pool.query("select r.reserveid, Res.name, b.address, t.time from reserves r inner join tables t on r.reserveid=t.reserveid and r.uid=$1 and r.timestamp >= (select current_date) inner join restaurants Res on t.rid=Res.rid inner join branches b on b.rid=Res.rid and t.bid=b.bid order by b.address", [req.user.uid], function(err, data) {
+        pool.query("select r.reserveid, Res.name, b.address, t.time from reserves r inner join tables t on r.reserveid=t.reserveid and r.uid=$1 and r.timestamp >= (select current_date) inner join restaurants Res on t.rid=Res.rid inner join branches b on b.rid=Res.rid and t.bid=b.bid order by t.time, Res.name, b.address", [req.user.uid], function(err, data) {
             if(err) {
                 return;
             }
