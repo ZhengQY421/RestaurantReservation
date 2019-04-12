@@ -112,7 +112,8 @@
                                 <%= ratingData[i].review%>
                             </p>
                             
-                            <div class="col-12">
+                            <% if (typeof ratingData[i] == "string") { %> 
+                                <div class="col-12">
                                     <div class="card my-2">
                                         <div class="card-body">
                                             <h5 class="card-title">
@@ -131,6 +132,8 @@
                                         </div>
                                     </div>
                             </div>
+                            <% } %>
+                           
                         </div>
                     </div>
                 </div>
@@ -145,29 +148,30 @@
 
             <h2 class="hdb col-6">Branch Locations</h2>
             <% for(var i =0; i<(branchData.length); i+=2) { %>
-            <div class="row col-12">
-                <div class="col-sm-6">
-                    <div class="card my-2" style="height: 12em">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <%= branchData[i].location%>
-                            </h5>
-                            <p class="card-text my-1">
-                                <%= branchData[i].address%>
-                            </p>
-                            <p class="card-text my-1">
-                                Tel: <%= branchData[i].pnumber%>
-                            </p>
-                            <a
-                                href="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>"
-                                class="btn btn-primary"
-                                >Reserve</a
-                            >
-                        </div>
-                    </form>
+                <div class="row col-12">
+                    <div class="col-sm-5">
+                        <div class="card my-2" style="height: 12em">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <%= branchData[i].location%>
+                                </h5>
+                                <p class="card-text my-1">
+                                    <%= branchData[i].address%>
+                                </p>
+                                <p class="card-text my-1">
+                                    Tel: <%= branchData[i].pnumber%>
+                                </p>
+                                <a
+                                    href="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>"
+                                    class="btn btn-primary"
+                                    >Reserve</a
+                                >
+                            </div>
+                       
+                    </div>
                 </div>
-                <% if(i+1 < branchData.length) { %>
-                    <div class="col-sm-6">
+                <% if(branchData[i+1]) { %>
+                    <div class="col-sm-5">
                             <div class="card my-2 " style="height: 12em">
                                 <div class="card-body">
                                     <h5 class="card-title">
@@ -187,11 +191,12 @@
                                     </a>
                                 </div>
                             </div>
-                        </form>
                     </div>
                 <%} %>
             </div>
-            <%} %>
+
+
+            <% } %>
             <br />
         </div>
     </body>
