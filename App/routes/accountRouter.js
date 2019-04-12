@@ -148,6 +148,7 @@ router.post("/addOwner", checkLoggedOut, function(req, res, next) {
 router.get("/profile", checkLoggedIn, function(req, res, next) {
     var sql_query = "";
     var sup_query = "";
+    var rating_query = "";
 
     if (req.user.iscustomer) {
         sql_query =
@@ -158,6 +159,10 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
 
         sup_query =
             "select * from choose C natural join Incentives i where C.uid=$1";
+
+        rating_query =
+            "select u.name, count(rt.score), cast(avg(rt.score) as decimal(3,2)) from (ratings rt natural join customers c) inner join users u on c.uid=u.uid where u.uid=$1 group by (u.name)";
+
     } else {
         sql_query =
             "select * from Users where Users.uid = " + "'" + req.user.uid + "'";
@@ -178,14 +183,25 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
                 return;
             }
 
-            console.log(supportData);
+            pool.query(rating_query, [req.user.uid], function(err, ratingData) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
 
-            res.render("account/profile", {
-                title: "User Profile",
-                currentUser: req.user,
-                userData: userData.rows,
-                supportData: supportData.rows
+                console.log(supportData);
+                console.log(ratingData);
+
+                res.render("account/profile", {
+                    title: "User Profile",
+                    currentUser: req.user,
+                    userData: userData.rows,
+                    supportData: supportData.rows,
+                    ratingData: ratingData.rows
+                });
+
             });
+
         });
     });
 });
@@ -197,7 +213,7 @@ router.get("/reservation", checkLoggedIn, function(req, res, next) {
                 return;
             }
             console.log(data.rows);
-            
+
             res.render("account/reservation", {
                 currentUser: req.user,
                 data: data.rows
@@ -209,7 +225,7 @@ router.get("/reservation", checkLoggedIn, function(req, res, next) {
                 return;
             }
             console.log(data);
-            
+
             res.render("account/reservation", {
                 title: "Upcoming reservations",
                 currentUser: req.user,

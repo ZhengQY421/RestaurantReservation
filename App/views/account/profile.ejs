@@ -37,6 +37,23 @@
                             <%=userData[0].pnumber%>
                         </h5>
                     </div>
+
+                    <% if (ratingData.length !== 0) { %>
+                        <div class="col-6">
+                            <h5>
+                                <br \ />
+
+                                <% if (ratingData[0].count == 1) { %>
+                                    <b>1 rating (<%=ratingData[0].avg%> avg)</b>
+                                <% } else { %>
+                                    <b><%=ratingData[0].count%> ratings (<%=ratingData[0].avg%> avg)</b>
+                                <% } %>
+
+                             </h5>
+                        </div>
+                    <% } %>
+
+
                 </div>
                 <% } %>
                 <br />
@@ -46,11 +63,11 @@
                     </h2>
                     <div class="card col">
                         <div class="card-body">
-                            <% if (supportData.length == 0) { %> 
-                                You don't have any rewards! Go buy some from the rewards store! 
+                            <% if (supportData.length == 0) { %>
+                                You don't have any rewards! Go buy some from the rewards store!
                             <% } else { %>
-        
-                                <% for(var i=0; i<supportData.length; i++) { %> 
+
+                                <% for(var i=0; i<supportData.length; i++) { %>
                                     <div class="card">
                                         <div class="card-body">
                                             <h5 class="card-title"><%= supportData[i].incentivename%></h5>
@@ -59,16 +76,16 @@
                                     </div>
                                     <br \>
                                 <% }%>
-                                        
+
                             <% } %>
                         </div>
                     </div>
-                    <% } else { %> 
+                    <% } else { %>
                         <h2 class="hdb" style="font-size: 2.5em;">
                                 Restaurant & Branches
                         </h2>
-        
-                        <% for(var i=0; i<supportData.length; i++) { %> 
+
+                        <% for(var i=0; i<supportData.length; i++) { %>
                                 <div class="card">
                                     <div class="card-body">
                                         <a class="card-title" style="font-size: 1.25em" href="/branches?name=<%= supportData[i].name%>"><b><%= supportData[i].name%> (<%= supportData[i].location %>)</b></a>
