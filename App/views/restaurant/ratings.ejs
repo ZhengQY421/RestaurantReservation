@@ -34,26 +34,37 @@
                                     <%= data[i].review%>
                                 </p>
     
-                                <% if (currentUser && currentUser.isowner && data[i].textresponse == "") { %> 
-                                <% } %>
-                                <div class="col-12">
-                                        <div class="card my-2">
-                                            <div class="card-body">
-                                                <h5 class="card-title">
-                                                    <%= title%>'s response:
-                                                </h5>
-                                                <h6
-                                                    class="mb-2 text text-muted"
-                                                    style="display: inline"
-                                                >
-                                                    <span><%= data[i].timestamp%></span>
-                                                </h6>
-                                                <p class="card-text my-1">
-                                                    <%= data[i].textresponse%>
-                                                </p>
+                                <% if (typeof data[i].textresponse == "string") { %> 
+                                    <div class="col-12">
+                                            <div class="card my-2">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">
+                                                        <%= title%>'s response:
+                                                    </h5>
+                                                    <h6
+                                                        class="mb-2 text text-muted"
+                                                        style="display: inline"
+                                                    >
+                                                        <span><%= data[i].timestamp%></span>
+                                                    </h6>
+                                                    <p class="card-text my-1">
+                                                        <%= data[i].textresponse%>
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                </div>
+                                    </div>
+                                <% } else if (currentUser && currentUser.isowner) { %> 
+                                    <div class="col-12">
+                                        <form action = "/branches/addresponse"
+                                            method = "post"
+                                            class="needs-validation"
+                                            novalidate
+                                        >
+                                        </form>
+
+                                    </div>
+                                <% }%>
+                                
                             </div>
                         </div>
                     </div>

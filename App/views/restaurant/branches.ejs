@@ -24,7 +24,7 @@
             <% if(currentUser && currentUser.iscustomer) { %>
                 <h2 class="hdb col-6">Your Review</h2>
             <form
-                action="/branches/addReview?rid=<%= branchData[0].rid%>"
+                action="/branches/addReview?rid=<%= branchData[0].rid%>&name=<%= branchData[0].name %>"
                 method="post"
                 class="needs-validation"
                 novalidate
@@ -112,7 +112,7 @@
                                 <%= ratingData[i].review%>
                             </p>
 
-                            <% if (currentUser && currentUser.isowner && ratingData[i].textresponse == "") { %> 
+                            <% if (currentUser && currentUser.isowner && ratingData[i].textresponse != "") { %> 
                             <% } %>
                             <div class="col-12">
                                     <div class="card my-2">
