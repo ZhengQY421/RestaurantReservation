@@ -9,10 +9,16 @@
         <br \ />
         <div class="card col-10 mx-auto" style="background-color: #fcfffd;">
             <br \ />
-            <h1 class="hdb" style="font-size: 3em;"><%= title %></h1>
+            <h1 class="hdb" style="font-size: 3em;">
+                <%= title %>
+            </h1>
             <h6 class="mb-2 text" style="display: inline">
                 <b><%= branchData[0].type%></b> |
-                <span><%= branchData[0].description%></span>
+                <span><%= branchData[0].description%></span> |
+                <% var color = "#5eff3a"; if (avg<3) {color = "red"} %>
+                    <div class="badge text-wrap" style="font-size: 1em; width: 3.5em; background-color:  <%= color %>" >
+                            <%= avg.slice(0,4)%>
+                    </div>
             </h6>
             <br \ />
             <% if(branchData[0].file != 'No photos available!') {%> 

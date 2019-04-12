@@ -28,7 +28,7 @@
                                     style="display: inline"
                                 >
                                     <b><%= data[i].location%></b> |
-                                    <span><%= data[i].timestamp%></span>
+                                    <span><% var time = JSON.stringify(data[i].timestamp);%><%= time.slice(1, time.indexOf("T"));%></span>
                                 </h6>
                                 <p class="card-text my-1">
                                     <%= data[i].review%>
@@ -45,7 +45,7 @@
                                                         class="mb-2 text text-muted"
                                                         style="display: inline"
                                                     >
-                                                        <span><%= data[i].timestamp%></span>
+                                                        <span><% var time = JSON.stringify(data[i].timestamp);%><%= time.slice(1, time.indexOf("T"));%></span>
                                                     </h6>
                                                     <p class="card-text my-1">
                                                         <%= data[i].textresponse%>
@@ -55,13 +55,17 @@
                                     </div>
                                 <% } else if (currentUser && currentUser.isowner) { %> 
                                     <div class="col-12">
-                                        <form action = "/branches/addresponse"
+                                        <form action = "/branches/addresponse?rtid=<%= data[i].rtid %>&rid=<%= data[i].rid %>&bid=<%= data[i].bid %>&name=<%= title%>"
                                             method = "post"
                                             class="needs-validation"
                                             novalidate
                                         >
+                                        <div class="form-group">
+                                            <textarea class="form-control" name = "response" id="response" rows="3" placeholder="Respond to this review here!" required></textarea>
+                                            
+                                        </div>
+                                        <button type="submit mx-auto my-2 col-4" class="btn btn-primary">Submit</button>
                                         </form>
-
                                     </div>
                                 <% }%>
                                 

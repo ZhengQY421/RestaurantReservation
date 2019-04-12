@@ -24,12 +24,20 @@ router.get("/", function(req, res, next) {
                 if (err) {
                     console.log(err);
                 }
-                res.render("restaurant/branches", {
-                    title: req.query.name,
-                    branchData: branchData.rows,
-                    ratingData: ratingData.rows,
-                    currentUser: req.user
-                });
+
+                pool.query(
+                    "select avg(rt.score) from (restaurants r inner join branches b on r.rid = b.rid inner join gives g on g.bid = b.bid inner join ratings rt on rt.rtid = g.rtid) where r.name = $1",
+                    [req.query.name],
+                    function(err, avgscore) {
+                        res.render("restaurant/branches", {
+                            title: req.query.name,
+                            branchData: branchData.rows,
+                            ratingData: ratingData.rows,
+                            currentUser: req.user,
+                            avg: avgscore.rows[0].avg
+                        });
+                    }
+                );
             }
         );
     });
@@ -88,6 +96,33 @@ router.post("/addReview", checkLoggedIn, function(req, res, next) {
                     req.flash("success", "Review posted!");
                     res.redirect("/branches?name=" + req.query.name);
                 }
+            );
+        }
+    );
+});
+
+router.post("/addresponse", checkLoggedIn, function(req, res, next) {
+    if (req.user.iscustomer) {
+        req.flash("Error", "Sorry, this feature is restaurant owners!");
+        res.redirect("/");
+    }
+
+    pool.query(
+        "INSERT INTO Response (timeStamp, rtid, rid, bid, textResponse) values (" +
+            "(select now()::timestamptz(0)), $1, $2, $3, $4)",
+        [req.query.rtid, req.query.rid, req.query.bid, req.body.response],
+        function(err, data) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            req.flash("Success", "You have successfully responded!");
+            res.redirect(
+                "/branches/ratings?rid=" +
+                    req.query.rid +
+                    "&name=" +
+                    req.query.name
             );
         }
     );
