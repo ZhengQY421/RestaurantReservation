@@ -35,7 +35,12 @@ router.post(
     }),
     function(req, res, next) {
         req.flash("success", "You have logged in!");
-        res.redirect("/");
+
+        if (req.user.iscustomer) {
+            res.redirect("/");
+        } else {
+            res.redirect("/account/owner_profile");
+        }
     }
 );
 
@@ -77,34 +82,29 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
 
                                 if (req.body.signupType === "Customer") {
                                     console.log(addr);
-                                    sql_query =
-                                        "INSERT INTO Customers(uid, address, pNumber, rewardPt) values ((select U.uid from Users U where U.name=" +
-                                        "'" +
-                                        name +
-                                        "'),'" +
-                                        addr +
-                                        "','" +
-                                        pNum +
-                                        "', 0)";
+
+                                    pool.query(
+                                        "INSERT INTO Customers(uid, address, pNumber, rewardPt) values ((select U.uid from Users U where U.name=$1 and U.email=$2), $3, $4, 0)",
+                                        [name, email, addr, pNum],
+                                        (err, data) => {
+                                            if (err) {
+                                                console.log(err);
+                                                console.log("error insert");
+                                                failRegister(req, res);
+                                                return;
+                                            }
+                                            req.flash(
+                                                "success",
+                                                "Account created. You may log in now."
+                                            );
+                                            res.redirect("/");
+                                        }
+                                    );
                                 } else if (req.body.signupType === "Owner") {
                                     req.session.valid = name;
                                     res.redirect(303, "/restaurant/add");
                                     return;
                                 }
-
-                                pool.query(sql_query, (err, data) => {
-                                    if (err) {
-                                        console.log(err);
-                                        console.log("error insert");
-                                        failRegister(req, res);
-                                        return;
-                                    }
-                                    req.flash(
-                                        "success",
-                                        "Account created. You may log in now."
-                                    );
-                                    res.redirect("/");
-                                });
                             }
                         }
                     );
@@ -238,5 +238,19 @@ router.get("/reservation", checkLoggedIn, function(req, res, next) {
             }
         );
     }
+});
+
+router.get("/owner_profile", checkLoggedIn, function(req, res, next) {
+    pool.query(
+        "select R.name from restaurants R join owners O on R.rid = O.rid where O.uid = $1",
+        [req.user.uid],
+        function(err, data) {
+            if (err) {
+                console.log(err);
+            }
+
+            res.redirect("/branches?name=" + data.rows[0].name);
+        }
+    );
 });
 module.exports = router;

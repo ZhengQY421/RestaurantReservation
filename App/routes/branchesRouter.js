@@ -38,7 +38,12 @@ router.get("/", function(req, res, next) {
                             sql_query =
                                 "select distinct seats from Tables T order by seats";
                             pool.query(sql_query, function(err, seats) {
-                                res.render("restaurant/branches", {
+                                var path = "restaurant/branches";
+
+                                if (req.user && req.user.isowner) {
+                                    path = "restaurant/branches_owner";
+                                }
+                                res.render(path, {
                                     title: req.query.name,
                                     branchData: branchData.rows,
                                     ratingData: ratingData.rows,

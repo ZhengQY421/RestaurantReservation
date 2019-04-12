@@ -10,6 +10,16 @@
 
         <h1 class="hd" style="font-size: 3em;"><%= title%>'s Ratings</h1>
 
+        <% if (data.length==0) { %> 
+            <div class="row col-12">
+                <div class="card my-2 col-12">
+                        <div class="card-body">
+                            You don't have any ratings! Ask your customers to leave some!
+                        </div>
+                </div>
+            </div>
+        <%} %>
+
         <% for (var i =0; i<data.length; i++) { %>
 
                 <div class="row col-12">

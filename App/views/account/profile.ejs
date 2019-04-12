@@ -46,7 +46,7 @@
                                 <% if (ratingData[0].count == 1) { %>
                                     <b>1 rating (<%=ratingData[0].avg%> avg)</b>
                                 <% } else { %>
-                                    <b><%=ratingData[0].count%> ratings (<%=ratingData[0].avg%> avg)</b>
+                                    <b><%=ratingData[0].count%> ratings (<%= ratingData[0].avg.slice(0,4)%> avg)</b>
                                 <% } %>
 
                              </h5>

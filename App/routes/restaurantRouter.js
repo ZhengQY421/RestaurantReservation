@@ -12,7 +12,7 @@ function failRegister(req, res) {
     res.redirect("/");
 }
 
-function insertBranch(req, res) {
+function insertBranch(req, res, func) {
     pool.query(
         "insert into branches(rid, bid, pnumber, address, location) values ((select R.rid from restaurants R where R.name=$1)," +
             "(select count(*)+1 from branches b where b.rid=(select R.rid from restaurants R where R.name=$1)), $2, $3, $4)",
@@ -20,14 +20,15 @@ function insertBranch(req, res) {
         function(err, data) {
             if (err) {
                 console.log(err);
-                console.log;
                 console.log("Error inserting branch");
+                req.flash("Error", "Insert branch failed.");
+                return;
             }
 
-            var info = [req.body.resName];
-            info.push(req.session.valid);
-            req.session.valid = info;
-            console.log(info);
+            req.flash("success", "Insert branch complete.");
+            try {
+                func();
+            } catch (e) {}
         }
     );
 }
@@ -88,13 +89,19 @@ router.post("/add", function(req, res, next) {
                     [req.body.resName, req.body.resType, req.body.cusType],
                     function(err, data) {
                         console.log(req.body.resName);
-                        insertBranch(req, res);
+                        insertBranch(req, res, function() {
+                            var info = [req.body.resName];
+                            info.push(req.session.valid);
+                            req.session.valid = info;
 
-                        res.redirect(307, "/account/addOwner");
+                            res.redirect(307, "/account/addOwner");
+                        });
                     }
                 );
             } else {
-                insertBranch(req, res);
+                insertBranch(req, res, function() {
+                    res.redirect(303, "/branches?name=" + req.body.resName);
+                });
             }
         }
     );

@@ -33,8 +33,13 @@
   </div>
   <% } %> <% } %>
 
+
+
+ <% var mang = "" %> 
+ <%if (currentUser && currentUser.isowner) { mang = " Management"; }%>
+ 
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#e8f4eb;">
-  <span class="navbar-brand mb-0 h1">Restaurant Reservation</span>
+  <span class="navbar-brand mb-0 h1">Restaurant Reservation<%= mang %></span>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -64,22 +69,22 @@
             </ul>
         <% } else {%>
 
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-            </li>
+      <% if (currentUser.iscustomer) { %> 
+        <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="/restaurant">Restaurants <span class="sr-only">(current)</span></a>
-            </li>
+              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                  <a class="nav-link" href="/restaurant">Restaurants <span class="sr-only">(current)</span></a>
+                </li>
+    
+                <li class="nav-item active">
+                  <a class="nav-link" href="/incentive">Rewards Store<span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+      <% } %>
 
-            <li class="nav-item active">
-              <a class="nav-link" href="/incentive">Rewards Store<span class="sr-only">(current)</span></a>
-            </li>
-
-
-        </ul>
-
-
+      
           <ul class="navbar-nav ml-auto">
               <li class="navbar-text" style="color:black">
                   Welcome,
@@ -89,9 +94,11 @@
                   <b><%= currentUser.name %></b>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="/account/profile">Profile</a>
+                  <% if (currentUser.iscustomer) { %> 
+                    <a class="dropdown-item" href="/account/profile">Profile</a>
                   <a class="dropdown-item" href="/account/reservation">Reservation</a>
                   <div class="dropdown-divider"></div>
+                  <% } %>
                   <a class="btn btn-danger mx-4" href="/account/logout">Log Out</a>
                 </div>
               </li>
