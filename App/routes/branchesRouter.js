@@ -12,7 +12,7 @@ const { checkLoggedIn, checkLoggedOut } = require("./middleware/auth");
 /* ---- GET for show all details of particular restaurant branches ---- */
 router.get("/", function(req, res, next) {
     sql_query =
-        "select R.rid, B.bid, coalesce(P.file, 'No photos available!') as file, R.name, R.type, R.description, coalesce(B.pnumber, 'No contact number available!') as pnumber, B.address, B.location FROM Photos P right outer join Restaurants R on P.rid=R.rid inner join Branches B on R.rid=B.rid and R.name=$1";
+        "select R.rid, B.bid, P.file, R.name, R.type, R.description, coalesce(B.pnumber, 'No contact number available!') as pnumber, B.address, B.location FROM Photos P natural join Restaurants R inner join Branches B on R.rid=B.rid and R.name=$1";
     pool.query(sql_query, [req.query.name], function(err, branchData) {
         if (err) {
             console.log(err);
@@ -24,7 +24,6 @@ router.get("/", function(req, res, next) {
                 if (err) {
                     console.log(err);
                 }
-                console.log(ratingData)
                 res.render("restaurant/branches", {
                     title: req.query.name,
                     branchData: branchData.rows,
@@ -71,8 +70,14 @@ router.post("/addReview", checkLoggedIn, function(req, res, next) {
             pool.query(
                 "insert into gives (timeStamp, uid, rtid, rid, bid) values (" +
                     "(select now()::timestamptz(0))," +
-                    " $1, (select R.rtid from Ratings R where R.review=$2), $4, (select B.bid from Branches B where B.location = $3 and B.rid=$4))",
-                [req.user.uid, req.body.review, req.body.branch, req.query.rid],
+                    " $1, (select R.rtid from Ratings R where R.review=$2 and R.uid = $1 and score = $5), $4, (select B.bid from Branches B where B.location = $3 and B.rid=$4))",
+                [
+                    req.user.uid,
+                    req.body.review,
+                    req.body.branch,
+                    req.query.rid,
+                    req.body.score
+                ],
                 function(err, data) {
                     console.log(req.body.branch);
 

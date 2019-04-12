@@ -24,7 +24,7 @@
             <% if(currentUser && currentUser.iscustomer) { %>
                 <h2 class="hdb col-6">Your Review</h2>
             <form
-                action="/branches/addReview?rid=<%= branchData[0].rid%>"
+                action="/branches/addReview?rid=<%= branchData[0].rid%>&name=<%= branchData[0].name %>"
                 method="post"
                 class="needs-validation"
                 novalidate
@@ -111,9 +111,7 @@
                             <p class="card-text my-1">
                                 <%= ratingData[i].review%>
                             </p>
-
-                            <% if (currentUser && currentUser.isowner && ratingData[i].textresponse == "") { %>
-                            <% } %>
+                            
                             <div class="col-12">
                                     <div class="card my-2">
                                         <div class="card-body">
@@ -149,32 +147,27 @@
             <% for(var i =0; i<(branchData.length); i+=2) { %>
             <div class="row col-12">
                 <div class="col-sm-6">
-                    <form action="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>" method="post">
-                        <input type="hidden" id="nameinput" name="name" value="<%= branchData[i].name%>"/>
-                        <input type="hidden" id="addressinput" name="address" value="<%= branchData[i].address%>"/>
-                        <div class="card my-2" style="height: 12em">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <%= branchData[i].location%>
-                                </h5>
-                                <p class="card-text my-1">
-                                    <%= branchData[i].address%>
-                                </p>
-                                <p class="card-text my-1">
-                                    Tel: <%= branchData[i].pnumber%>
-                                </p>
-                                <button class="btn btn-primary">
-                                    Reserve
-                                </button>
-                            </div>
+                    <div class="card my-2" style="height: 12em">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= branchData[i].location%>
+                            </h5>
+                            <p class="card-text my-1">
+                                <%= branchData[i].address%>
+                            </p>
+                            <p class="card-text my-1">
+                                Tel: <%= branchData[i].pnumber%>
+                            </p>
+                            <a
+                                href="/reservation?name=<%= branchData[i].name%>&address=<%= branchData[i].address%>"
+                                class="btn btn-primary"
+                                >Reserve</a
+                            >
                         </div>
                     </form>
                 </div>
                 <% if(i+1 < branchData.length) { %>
                     <div class="col-sm-6">
-                        <form action="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>" method="post">
-                            <input type="hidden" id="nameinput" name="name" value="<%= branchData[i+1].name%>"/>
-                            <input type="hidden" id="addressinput" name="address" value="<%= branchData[i+1].address%>"/>
                             <div class="card my-2 " style="height: 12em">
                                 <div class="card-body">
                                     <h5 class="card-title">
@@ -186,9 +179,12 @@
                                     <p class="card-text my-1">
                                         Tel: <%= branchData[i+1].pnumber%>
                                     </p>
-                                    <button class="btn btn-primary">
+                                    <a
+                                        href="/reservation?name=<%= branchData[i+1].name%>&address=<%= branchData[i+1].address%>"
+                                        class="btn btn-primary"
+                                    >
                                         Reserve
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </form>
