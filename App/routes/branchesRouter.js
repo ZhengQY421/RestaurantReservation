@@ -66,12 +66,35 @@ router.post("/addReview", function(req, res, next) {
                 console.log(err);
             }
 
-            timeStamp, uid, rtid, rid, bid;
+            var timeStamp, uid, rtid, rid, bid;
 
             pool.query(
-                "insert into gives values" +
-                    "(select now()::timestamptz(0)," +
-                    " $1, (select R.rtid from Ratings R where R.review=$2),"
+                "insert into gives (timeStamp, uid, rtid, rid, bid) values (" +
+                    "(select now()::timestamptz(0))," +
+                    " $1, (select R.rtid from Ratings R where R.review=$2 and R.uid = $1 and score = $5), $4, (select B.bid from Branches B where B.location = $3 and B.rid=$4))",
+                [
+                    req.user.uid,
+                    req.body.review,
+                    req.body.branch,
+                    req.query.rid,
+                    req.body.score
+                ],
+                function(err, data) {
+                    console.log(req.body.branch);
+
+                    if (err) {
+                        console.log(err);
+                        req.flash(
+                            "error",
+                            "Review couldn't be posted due to an unknown error!"
+                        );
+                        res.redirect("/branches?name=" + req.query.name);
+                        return;
+                    }
+
+                    req.flash("success", "Review posted!");
+                    res.redirect("/branches?name=" + req.query.name);
+                }
             );
         }
     );
