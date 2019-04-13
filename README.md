@@ -7,7 +7,7 @@ Restaurant branch owners can also use the web app to manage their restaurant inf
 
 1. Install the softwares and packages listed under prerequisites
 2. Navigate to the project folder on psql terminal and initialize the database in psql terminal by executing `\i proj_init.sql`; a .env file is needed to connect the database.
-3. In command line/terminal, change directory to the ../RestaurantReservation/App.  
+3. In command line/terminal, change directory to the ../RestaurantReservation/App.
 4. Enter the command `npm install`
 5. Enter the command `npm start` to start the server.
 6. Open a web browser and navigate to `localhost:3000` to begin using the web application.
@@ -19,7 +19,7 @@ Restaurant branch owners can also use the web app to manage their restaurant inf
 - npm and relevant packages
 
 ### Troubleshoot
-Error usually happens if not all required packages are installed. In such case, excute `sudo npm install packagename` to solve the issue. The package name is often included as a part of the exception statemnent.
+Errors will occur if not all required packages are installed. To solve this issue, excute `sudo npm install packagename`. The package name is often included as a part of the exception statemnent.
 
 
 ## Built With

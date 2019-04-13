@@ -54,16 +54,8 @@ router.get("/", function(req, res, next) {
                                 });
                             });
                         });
-                    }
-                );
-            }
-            res.render("restaurant/branches", {
-                title: req.query.name,
-                branchData: branchData.rows,
-                ratingData: ratingData.rows,
-                currentUser: req.user
+                    });
             });
-        });
     });
 });
 
