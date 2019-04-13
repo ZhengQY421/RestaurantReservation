@@ -235,6 +235,7 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
 
                 console.log(supportData);
                 console.log(ratingData);
+                console.log(userData);
 
                 res.render("account/profile", {
                     title: "User Profile",
