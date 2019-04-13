@@ -13,9 +13,25 @@
             A restaurant registration is also required if you are registering as
             an owner.
             <br />
-            <a href="/">
-                Don't have a restaurant? Register as a customer instead.</a
+
+
+            <form
+                action="/account/deleteuser"
+                method="post"
             >
+                <input
+                    type="hidden"
+                    id="uid"
+                    name="uid"
+                    value="<%= data[0].uid%>"
+                />
+
+
+            <button type="submit" class="btn-link">Don't have a restaurant? Register as a customer instead.</button>
+
+            </form>
+
+
             <form
                 action="/restaurant/add"
                 method="post"

@@ -25,6 +25,47 @@ function makeid(name) {
     return first.slice(0, 1) + last + digit + "";
 }
 
+/* ---- Post Function for Deleting an Account ---- */
+router.post("/deleteuser", function(req, res, next) {
+    pool.connect(function(err, client, done) {
+        function abort(err) {
+            if (err) {
+                client.query("ROLLBACK", function(err) {
+                    done();
+                });
+                return true;
+            }
+            return false;
+        }
+        client.query("BEGIN", function(err, res1) {
+            if (abort(err)) {
+                return;
+            }
+            client.query(
+            "delete from users where uid=$1",
+            [req.body.uid],
+                function(err, res3) {
+                    if (abort(err)) {
+                        return;
+                    }
+
+                    client.query("COMMIT", function(err, res4) {
+                        if (abort(err)) {
+                            return;
+                        }
+                        req.flash(
+                            "success",
+                            "Account deleted!"
+                        );
+                        res.redirect("/");
+                        done();
+                    });
+                });
+        });
+    });
+});
+
+
 /* ---- Post Function for Login ---- */
 router.post(
     "/login",
@@ -69,9 +110,10 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
                     var pNum = req.body.signupPNum;
 
                     pool.query(
-                        "insert into Users (name, email, password) values ($1, $2, $3)",
+                        "insert into Users (name, email, password) values ($1, $2, $3) returning *",
                         [name, email, password],
-                        function(err, data) {
+                        function(err, data1) {
+                            //console.log(data1);
                             if (err) {
                                 console.error(
                                     "Error executing query",
@@ -102,8 +144,11 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
                                     );
                                 } else if (req.body.signupType === "Owner") {
                                     req.session.valid = name;
-                                    res.redirect(303, "/restaurant/add");
-                                    return;
+                                    res.render('restaurant/add', {
+                                        title: 'Add a Restaurant',
+                                        data: data1.rows,
+                                        currentUser: req.user});
+                                    // return;
                                 }
                             }
                         }
