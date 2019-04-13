@@ -182,51 +182,112 @@ router.post("/submit", checkLoggedIn, function(req, res, next) {
     });
 });
 
-router.post("/cancel", checkLoggedIn, function(req, res, next) {
-    pool.connect(function(err, client, done) {
-        function abort(err) {
-            if (err) {
-                client.query("ROLLBACK", function(err) {
-                    done();
-                });
-                return true;
+router.post("/perform", checkLoggedIn, function(req, res, next) {
+    if(req.body.submit=='cancel') {
+        pool.connect(function(err, client, done) {
+            function abort(err) {
+                if (err) {
+                    client.query("ROLLBACK", function(err) {
+                        done();
+                    });
+                    return true;
+                }
+                return false;
             }
-            return false;
-        }
-        client.query("BEGIN", function(err, res1) {
-            if (abort(err)) {
-                return;
-            }
-            client.query(
-                "Update tables set vacant=true, reserveid=null where reserveid=$1",
-                [req.body.reserveid],
-                function(err, res2) {
-                    if (abort(err)) {
-                        return;
-                    }
-                    client.query(
-                        "delete from reserves where reserveid=$1",
-                        [req.body.reserveid],
-                        function(err, res3) {
-                            if (abort(err)) {
-                                return;
-                            }
-                            client.query("COMMIT", function(err, res4) {
+            client.query("BEGIN", function(err, res1) {
+                if (abort(err)) {
+                    return;
+                }
+                client.query(
+                    "Update tables set vacant=true, reserveid=null where reserveid=$1",
+                    [req.body.reserveid],
+                    function(err, res2) {
+                        if (abort(err)) {
+                            return;
+                        }
+                        client.query(
+                            "delete from reserves where reserveid=$1",
+                            [req.body.reserveid],
+                            function(err, res3) {
                                 if (abort(err)) {
                                     return;
                                 }
-                                req.flash(
-                                    "success",
-                                    "Reservation has been cancelled!"
-                                );
-                                res.redirect("/account/reservation");
-                                done();
-                            });
+                                client.query("COMMIT", function(err, res4) {
+                                    if (abort(err)) {
+                                        return;
+                                    }
+                                    req.flash(
+                                        "success",
+                                        "Reservation has been cancelled!"
+                                    );
+                                    res.redirect("/account/reservation");
+                                    done();
+                                });
+                            }
+                        );
+                    }
+                );
+            });
+        });
+    } else {
+        pool.connect(function(err, client, done) {
+            function abort(err) {
+                if (err) { 
+                    client.query("ROLLBACK", function(err) {
+                        done();
+                    });
+                    return true;
+                }
+                return false;
+            }
+            client.query("BEGIN", function(err, res1) {
+                if (abort(err)) {
+                    return;
+                }
+                client.query("select r.uid from reserves r where r.reserveid=$1", [req.body.reserveid], function(err, data) {
+                    if(abort(err)) {
+                        return;
+                    }
+                    var uid = data.rows[0].uid
+                    client.query(
+                        "Update tables set vacant=true, reserveid=null where reserveid=$1",
+                        [req.body.reserveid],
+                        function(err, res2) {
+                            if (abort(err)) {
+                                return;
+                            }
+                            client.query(
+                                "delete from reserves where reserveid=$1",
+                                [req.body.reserveid],
+                                function(err, res3) {
+                                    if (abort(err)) {
+                                        return;
+                                    }
+                                    client.query("update customers set rewardpt = rewardpt + 10 where uid=$1", [uid], function(err, res4) {
+                                        if(abort(err)) {
+                                            return;
+                                        }
+                                        client.query("COMMIT", function(err, res4) {
+                                            if (abort(err)) {
+                                                return;
+                                            }
+                                            req.flash(
+                                                "success",
+                                                "Woohoo we are making money today!"
+                                            );
+                                            res.redirect("/account/reservation");
+                                            done();
+                                        });
+                                    });
+                                }
+                            );
                         }
                     );
-                }
-            );
+                });
+                
+            });
         });
-    });
+    }
+    
 });
 module.exports = router;
