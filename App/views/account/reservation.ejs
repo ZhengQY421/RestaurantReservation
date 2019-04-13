@@ -10,12 +10,12 @@
 
         <div class="container">
             <% if(currentUser.iscustomer) { %>
-                <h1 class="hdb" style="font-size: 3em;">
+                <h1 class="hd" style="font-size: 3em;">
                     <%= currentUser.name %>'s Reservations
                 </h1>
                 <% for(var i =0; i<data.length; i++) { %>
 
-                    <form action="/reservation/cancel" method="post">   
+                    <form action="/reservation/perform" method="post">   
                         <input type="hidden" id="reserveid" name="reserveid" value="<%= data[i].reserveid%>"/>
                         <div class="card">
                             <div class="card-body">
@@ -26,7 +26,7 @@
                                         <h5><b>Reservation Time:</b>  <%=data[i].time%></h5>
                                     </div>
                                     <div class="d-flex flex-column align-self-center ml-auto">
-                                        <button type="submit" class="btn btn-primary">Cancel Reservation</button>
+                                        <button type="submit" name="submit" value="cancel" class="btn btn-primary">Cancel Reservation</button>
                                     </div>
                                 </div> 
                             </div>
@@ -41,26 +41,28 @@
                 </h1>
                 <% for(var i =0; i<data.length; i++) { %>
 
-                        <form action="/reservation/cancel" method="post">   
-                            <input type="hidden" id="reserveid" name="reserveid" value="<%= data[i].reserveid%>"/>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex flex-row">
-                                        <div class="d-flex flex-column">
-                                            <h5><b>Customer:</b>  <%= data[i].name%></h5>
-                                            <h5><b>Time:</b>  <%=data[i].time%></h5>   
-                                            <h5><b>Number of guest(s):</b>  <%=data[i].guestcount%></h5>
-                                            <h5><b>Branch location:</b>  <%=data[i].location%></h5>
-                                        </div>
-                                        <div class="d-flex flex-column align-self-center ml-auto">
-                                            <button type="submit" class="btn btn-primary">Cancel Reservation</button>
-                                        </div>
-                                    </div> 
-                                </div>
+                    <form action="/reservation/perform" method="post">   
+                        <input type="hidden" id="reserveid" name="reserveid" value="<%= data[i].reserveid%>"/>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex flex-row">
+                                    <div class="d-flex flex-column">
+                                        <h5><b>Customer:</b>  <%= data[i].name%></h5>
+                                        <h5><b>Time:</b>  <%=data[i].time%></h5>   
+                                        <h5><b>Number of guest(s):</b>  <%=data[i].guestcount%></h5>
+                                        <h5><b>Branch location:</b>  <%=data[i].location%></h5>
+                                    </div>
+                                    <div class="d-flex flex-column align-self-center ml-auto">
+                                        <button type="submit" name="submit" value="confirm" class="btn btn-primary">Confirm Reservation</button>
+                                        <br/>
+                                        <button type="submit" name="submit" value="cancel" class="btn btn-primary">Cancel Reservation</button>
+                                    </div>
+                                </div> 
                             </div>
-                        </form>
-                
-                        <br \>
+                        </div>
+                    </form>
+            
+                    <br \>
                     <%} %>
             <%} %>
             

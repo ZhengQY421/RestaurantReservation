@@ -35,7 +35,12 @@ router.post(
     }),
     function(req, res, next) {
         req.flash("success", "You have logged in!");
-        res.redirect("/");
+
+        if (req.user.iscustomer) {
+            res.redirect("/");
+        } else {
+            res.redirect("/account/owner_profile");
+        }
     }
 );
 
@@ -77,34 +82,29 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
 
                                 if (req.body.signupType === "Customer") {
                                     console.log(addr);
-                                    sql_query =
-                                        "INSERT INTO Customers(uid, address, pNumber, rewardPt) values ((select U.uid from Users U where U.name=" +
-                                        "'" +
-                                        name +
-                                        "'),'" +
-                                        addr +
-                                        "','" +
-                                        pNum +
-                                        "', 0)";
+
+                                    pool.query(
+                                        "INSERT INTO Customers(uid, address, pNumber, rewardPt) values ((select U.uid from Users U where U.name=$1 and U.email=$2), $3, $4, 0)",
+                                        [name, email, addr, pNum],
+                                        (err, data) => {
+                                            if (err) {
+                                                console.log(err);
+                                                console.log("error insert");
+                                                failRegister(req, res);
+                                                return;
+                                            }
+                                            req.flash(
+                                                "success",
+                                                "Account created. You may log in now."
+                                            );
+                                            res.redirect("/");
+                                        }
+                                    );
                                 } else if (req.body.signupType === "Owner") {
                                     req.session.valid = name;
                                     res.redirect(303, "/restaurant/add");
                                     return;
                                 }
-
-                                pool.query(sql_query, (err, data) => {
-                                    if (err) {
-                                        console.log(err);
-                                        console.log("error insert");
-                                        failRegister(req, res);
-                                        return;
-                                    }
-                                    req.flash(
-                                        "success",
-                                        "Account created. You may log in now."
-                                    );
-                                    res.redirect("/");
-                                });
                             }
                         }
                     );
@@ -120,7 +120,7 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
     );
 });
 
-router.post("/addOwner", checkLoggedOut, function(req, res, next) {
+router.post("/addOwner", function(req, res, next) {
     var info = req.session.valid;
     req.session.valid = null;
 
@@ -135,11 +135,20 @@ router.post("/addOwner", checkLoggedOut, function(req, res, next) {
                 failRegister(req, res);
                 return;
             }
-            req.flash(
-                "success",
-                "Account and restaurant created. You may log in now."
-            );
-            res.redirect("/");
+            if(!req.isAuthenticated) {
+                req.flash(
+                    "success",
+                    "Account and restaurant created. You may log in now."
+                );
+                res.redirect("/");
+            } else {
+                req.flash(
+                    "success",
+                    "Account and restaurant created."
+                );
+                res.redirect("/account/owner_profile")
+            }
+            
         }
     );
 });
@@ -162,7 +171,6 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
 
         rating_query =
             "select u.name, count(rt.score), cast(avg(rt.score) as decimal(3,2)) from (ratings rt natural join customers c) inner join users u on c.uid=u.uid where u.uid=$1 group by (u.name)";
-
     } else {
         sql_query =
             "select * from Users where Users.uid = " + "'" + req.user.uid + "'";
@@ -199,39 +207,69 @@ router.get("/profile", checkLoggedIn, function(req, res, next) {
                     supportData: supportData.rows,
                     ratingData: ratingData.rows
                 });
-
             });
-
         });
     });
 });
 
 router.get("/reservation", checkLoggedIn, function(req, res, next) {
     if (req.user.iscustomer) {
-        pool.query("select r.reserveid, Res.name, b.address, t.time from reserves r inner join tables t on r.reserveid=t.reserveid and r.uid=$1 and r.timestamp >= (select current_date) inner join restaurants Res on t.rid=Res.rid inner join branches b on b.rid=Res.rid and t.bid=b.bid order by t.time, Res.name, b.address", [req.user.uid], function(err, data) {
-            if(err) {
-                return;
-            }
-            console.log(data.rows);
+        pool.query(
+            "select r.reserveid, Res.name, b.address, t.time from reserves r inner join tables t on r.reserveid=t.reserveid and r.uid=$1 and r.timestamp >= (select current_date) inner join restaurants Res on t.rid=Res.rid inner join branches b on b.rid=Res.rid and t.bid=b.bid order by t.time, Res.name, b.address",
+            [req.user.uid],
+            function(err, data) {
+                if (err) {
+                    return;
+                }
+                console.log(data.rows);
 
-            res.render("account/reservation", {
-                currentUser: req.user,
-                data: data.rows
-            });
-        })
+                res.render("account/reservation", {
+                    currentUser: req.user,
+                    data: data.rows
+                });
+            }
+        );
     } else {
-        pool.query("select reserves.reserveid, branches.location, users.name, tables.time, reserves.guestcount from restaurants natural join owners natural join branches natural join tables inner join reserves on tables.reserveid=reserves.reserveid inner join users on reserves.uid=users.uid where owners.uid=$1 and tables.vacant=false order by branches.location;", [req.user.uid], function(err, data) {
-            if(err) {
-                return;
-            }
-            console.log(data);
+        pool.query(
+            "select reserves.reserveid, branches.location, users.name, tables.time, reserves.guestcount from restaurants natural join owners natural join branches natural join tables inner join reserves on tables.reserveid=reserves.reserveid inner join users on reserves.uid=users.uid where owners.uid=$1 and tables.vacant=false order by branches.location;",
+            [req.user.uid],
+            function(err, data) {
+                if (err) {
+                    return;
+                }
+                console.log(data);
 
-            res.render("account/reservation", {
-                title: "Upcoming reservations",
-                currentUser: req.user,
-                data: data.rows
-            });
-        })
+                res.render("account/reservation", {
+                    title: "Upcoming reservations",
+                    currentUser: req.user,
+                    data: data.rows
+                });
+            }
+        );
     }
-})
+});
+
+router.get("/owner_profile", checkLoggedIn, function(req, res, next) {
+    pool.query(
+        "select R.name from restaurants R join owners O on R.rid = O.rid where O.uid = $1",
+        [req.user.uid],
+        function(err, data) {
+            if (err) {
+                console.log(err);
+            }
+            if(data.rows.length) {
+                res.redirect("/branches?name=" + data.rows[0].name);
+            } else {
+                req.flash("error", "Please add a restaurant before proceeding!")
+                res.redirect(303, "/restaurant/add");
+                return;
+            }   
+        }
+    );
+});
+
+router.post("/deleteuser", function(req, res, next) {
+    console.log(req)
+});
 module.exports = router;
+
