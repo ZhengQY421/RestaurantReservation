@@ -12,16 +12,50 @@ const { checkLoggedIn, checkLoggedOut } = require("./middleware/auth");
 /* ---- GET for show all details of particular restaurant branches ---- */
 router.get("/", function(req, res, next) {
     sql_query =
-        "select R.rid, B.bid, coalesce(P.file, 'No photos available!') as file, R.name, R.type, R.description, coalesce(B.pnumber, 'No contact number available!') as pnumber, B.address, B.location FROM Photos P right outer join Restaurants R on P.rid=R.rid inner join Branches B on R.rid=B.rid and R.name=$1";    pool.query(sql_query, [req.query.name], function(err, branchData) {
-    if (err) {
-        console.log(err);
-    }
-    pool.query(
-        "select * from gives G natural join ratings RT natural join response R natural join Users U natural join branches where G.rid = $1",
-        [branchData.rows[0].rid],
-        function(err, ratingData) {
-            if (err) {
-                console.log(err);
+        "select R.rid, B.bid, coalesce(P.file, 'No photos available!') as file, R.name, R.type, R.description, coalesce(B.pnumber, 'No contact number available!') as pnumber, B.address, B.location FROM Photos P right outer join Restaurants R on P.rid=R.rid inner join Branches B on R.rid=B.rid and R.name=$1";
+    pool.query(sql_query, [req.query.name], function(err, branchData) {
+        if (err) {
+            console.log(err);
+        }
+        pool.query(
+            "select * from response right outer join ratings on response.rtid = ratings.rtid inner join users on users.uid = ratings.uid inner join gives on gives.rtid = ratings.rtid inner join branches on branches.bid = gives.bid and branches.rid = gives.rid where gives.rid = $1",
+            [branchData.rows[0].rid],
+            function(err, ratingData) {
+                if (err) {
+                    console.log(err);
+                }
+
+                pool.query(
+                    "select avg(rt.score) from (restaurants r inner join branches b on r.rid = b.rid inner join gives g on g.bid = b.bid inner join ratings rt on rt.rtid = g.rtid) where r.name = $1",
+                    [req.query.name],
+                    function(err, avgscore) {
+                        sql_query =
+                            "select distinct time from Tables T order by time";
+                        pool.query(sql_query, function(err, time) {
+                            if (err) {
+                                return;
+                            }
+                            sql_query =
+                                "select distinct seats from Tables T order by seats";
+                            pool.query(sql_query, function(err, seats) {
+                                var path = "restaurant/branches";
+
+                                if (req.user && req.user.isowner) {
+                                    path = "restaurant/branches_owner";
+                                }
+                                res.render(path, {
+                                    title: req.query.name,
+                                    branchData: branchData.rows,
+                                    ratingData: ratingData.rows,
+                                    currentUser: req.user,
+                                    avg: avgscore.rows[0].avg,
+                                    time: time.rows,
+                                    data: seats.rows
+                                });
+                            });
+                        });
+                    }
+                );
             }
             res.render("restaurant/branches", {
                 title: req.query.name,
@@ -67,14 +101,8 @@ router.post("/addReview", checkLoggedIn, function(req, res, next) {
             pool.query(
                 "insert into gives (timeStamp, uid, rtid, rid, bid) values (" +
                     "(select now()::timestamptz(0))," +
-                    " $1, (select R.rtid from Ratings R where R.review=$2 and R.uid = $1 and score = $5), $4, (select B.bid from Branches B where B.location = $3 and B.rid=$4))",
-                [
-                    req.user.uid,
-                    req.body.review,
-                    req.body.branch,
-                    req.query.rid,
-                    req.body.score
-                ],
+                    " $1, (select R.rtid from Ratings R where R.review=$2), $4, (select B.bid from Branches B where B.location = $3 and B.rid=$4))",
+                [req.user.uid, req.body.review, req.body.branch, req.query.rid],
                 function(err, data) {
                     console.log(req.body.branch);
 
@@ -91,6 +119,33 @@ router.post("/addReview", checkLoggedIn, function(req, res, next) {
                     req.flash("success", "Review posted!");
                     res.redirect("/branches?name=" + req.query.name);
                 }
+            );
+        }
+    );
+});
+
+router.post("/addresponse", checkLoggedIn, function(req, res, next) {
+    if (req.user.iscustomer) {
+        req.flash("Error", "Sorry, this feature is restaurant owners!");
+        res.redirect("/");
+    }
+
+    pool.query(
+        "INSERT INTO Response (timeStamp, rtid, rid, bid, textResponse) values (" +
+            "(select now()::timestamptz(0)), $1, $2, $3, $4)",
+        [req.query.rtid, req.query.rid, req.query.bid, req.body.response],
+        function(err, data) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            req.flash("Success", "You have successfully responded!");
+            res.redirect(
+                "/branches/ratings?rid=" +
+                    req.query.rid +
+                    "&name=" +
+                    req.query.name
             );
         }
     );

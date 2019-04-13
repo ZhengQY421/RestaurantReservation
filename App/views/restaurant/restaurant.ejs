@@ -13,7 +13,13 @@
                 <a href="/branches?name=<%= data[i].name%>" style="color: #000" class="card-link">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title" style="font-weight: bold; font-size: 25px;"><%= data[i].name%></h5>
+                            <h5 class="card-title" style="font-weight: bold; font-size: 25px;">
+                                <%= data[i].name%> | 
+                                <% var color = "#5eff3a"; if (data[i].avg<3) {color = "red"} %>
+                    <div class="badge text-wrap" style="font-size: 1em; width: 3.1em; background-color:  <%= color %>" >
+                            <%= data[i].avg.slice(0,4) %>
+                    </div>
+                            </h5>
                             <h6 class="card-subtitle mb-2 text-muted"><%= data[i].type%></h6>
                             <p class="card-text" style="font-size: 15px""><%= data[i].description%></p>
                         </div>
