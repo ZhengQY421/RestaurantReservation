@@ -56,7 +56,7 @@ router.get("/search", function(req, res, next) {
         (err, data) => {
             console.log(err);
             console.log(req.query);
-            res.render("restaurant/search", {
+            res.render("restaurant/restaurant", {
                 title: "Search Restaurants",
                 data: data.rows,
                 currentUser: req.user

@@ -165,7 +165,7 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
     );
 });
 
-router.post("/addOwner", checkLoggedOut, function(req, res, next) {
+router.post("/addOwner", function(req, res, next) {
     var info = req.session.valid;
     req.session.valid = null;
 
@@ -180,11 +180,20 @@ router.post("/addOwner", checkLoggedOut, function(req, res, next) {
                 failRegister(req, res);
                 return;
             }
-            req.flash(
-                "success",
-                "Account and restaurant created. You may log in now."
-            );
-            res.redirect("/");
+            if(!req.isAuthenticated) {
+                req.flash(
+                    "success",
+                    "Account and restaurant created. You may log in now."
+                );
+                res.redirect("/");
+            } else {
+                req.flash(
+                    "success",
+                    "Account and restaurant created."
+                );
+                res.redirect("/account/owner_profile")
+            }
+            
         }
     );
 });
@@ -294,9 +303,15 @@ router.get("/owner_profile", checkLoggedIn, function(req, res, next) {
             if (err) {
                 console.log(err);
             }
-
-            res.redirect("/branches?name=" + data.rows[0].name);
+            if(data.rows.length) {
+                res.redirect("/branches?name=" + data.rows[0].name);
+            } else {
+                req.flash("error", "Please add a restaurant before proceeding!")
+                res.redirect(303, "/restaurant/add");
+                return;
+            }   
         }
     );
 });
 module.exports = router;
+

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Header inclusion-->
+        <%- include ../template/header.ejs %>
+    </head>
+    <body class="bg">
+        <%- include ../template/navbar.ejs %>
+        <br \>
+        <h1 class="hd" style="font-size: 3em;" ><%= title %></h1>
+        <br \>
+        
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title" id="name"><%= req.name%></h5>
+                    <h6 class="card-subtitle mb-2 text-muted" id="address"><%= req.address%></h6>
+                </div>
+                <div class="card-body">
+                    <form action = "/reservation/submit?name=<%= req.name%>&address=<%= req.address%>" method ="post" class="needs-validation" novalidate>
+                        <input type="hidden" id="nameinput" name="name" value="<%= req.name%>"/>
+                        <input type="hidden" id="addressinput" name="address" value="<%= req.address%>"/>   
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-time">Time</span>
+                            </div>
+                            <select name="time" id="time" class="form-control">
+                                <% for(var i =0; i<time.length; i++) { %>
+                                    <option><%= time[i].time%></option>
+                                <%} %>
+                            </select> 
+                        </div><br>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-time">Number of Guests</span>
+                            </div>
+                            <select name="seats" id="seats" class="form-control">
+                                <% for(var i =0; i<data.length; i++) { %>
+                                    <option><%= data[i].seats%></option>
+                                <%} %>
+                            </select> 
+                        </div><br>
+                        <button class="btn btn-primary">Make a reservation</button>
+                    </form>
+                </div>
+            </div>
+            <br \>
+        
+    </body>
+</html>
+
+
+
+                

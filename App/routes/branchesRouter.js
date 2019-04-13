@@ -43,6 +43,10 @@ router.get("/", function(req, res, next) {
                                 if (req.user && req.user.isowner) {
                                     path = "restaurant/branches_owner";
                                 }
+                                
+                                if(!req.isAuthenticated()) {
+                                    req.flash("error", "Please login before making a reservation!")
+                                }
                                 res.render(path, {
                                     title: req.query.name,
                                     branchData: branchData.rows,
