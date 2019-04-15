@@ -263,7 +263,7 @@ INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '490 Jalan 
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 555E Crona Road Grove SINGAPORE 632951', '85559123', 205 from Users U where U.name='Bruise Wayne';
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 441A Jalan Oberbrunner Grove SINGAPORE 373484', '85554657', 350 from Users U where U.name='Baby Max';
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 146D Farrell Place Park SINGAPORE 173569', '95559431', 75 from Users U where U.name='Captain America';
-INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 965C Friesen Crescent Way SINGAPORE 706461', '95551651', 55 from Users U where U.name='Pikachu Pie';
+INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, 'Blk 965C Friesen Crescent Way SINGAPORE 706461', '95551651', 1000 from Users U where U.name='Pikachu Pie';
 INSERT INTO Customers(uid, address, pNumber, rewardPt) select U.uid, '376 Von Alley Park SINGAPORE 067166', '95554089', 165 from Users U where U.name='Ash Ketchup';
 
 INSERT INTO Restaurants(name, type, description) VALUES ('Putien', 'Casual Dining', 'Seafood, Singaporean, Chinese');
