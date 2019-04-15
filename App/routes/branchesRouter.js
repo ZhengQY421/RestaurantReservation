@@ -71,7 +71,7 @@ router.get("/", function(req, res, next) {
 /* ---- GET for show all ratings of particular restaurant branches ---- */
 router.get("/ratings", function(req, res, next) {
     pool.query(
-        "select * from ratings natural join branches natural join Users left outer join response natural join gives where rid=$1",
+        "select * from response right outer join ratings on response.rtid = ratings.rtid inner join users on users.uid = ratings.uid inner join gives on gives.rtid = ratings.rtid inner join branches on branches.bid = gives.bid and branches.rid = gives.rid where gives.rid = $1",
         [req.query.rid],
         function(err, data) {
             if (err) {
