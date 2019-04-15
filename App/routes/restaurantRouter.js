@@ -7,6 +7,8 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 });
 
+const { checkLoggedIn, checkLoggedOut } = require("./middleware/auth");
+
 function failRegister(req, res) {
     req.flash("error", "Sorry, an error has occurred. Please try again later.");
     res.redirect("/");
@@ -74,7 +76,7 @@ router.get("/add", function(req, res, next) {
 });
 
 /* ---- Post for getting restaurant ---- */
-router.post("/add", function(req, res, next) {
+router.post("/add", checkLoggedIn, function(req, res, next) {
     pool.query(
         "select R.rid from restaurants R where R.name=$1",
         [req.body.resName],

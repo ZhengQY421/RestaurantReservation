@@ -5,7 +5,7 @@ function checkLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
-    req.flash("warning", "You must first log in before continuing!");
+    req.flash("warning", "You must first log in/sign up before continuing!");
     res.redirect("/");
     return false;
 }

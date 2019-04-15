@@ -14,11 +14,7 @@
             an owner.
             <br />
 
-
-            <form
-                action="/account/deleteuser"
-                method="post"
-            >
+            <form action="/account/deleteuser" method="post">
                 <input
                     type="hidden"
                     id="uid"
@@ -26,11 +22,12 @@
                     value="<%= data[0].uid%>"
                 />
 
-
-            <button type="submit" class="btn-link">Don't have a restaurant? Register as a customer instead.</button>
-
+                <button type="submit" class="btn btn-link">
+                    Don't have a restaurant? Register as a customer instead.
+                </button>
             </form>
 
+        </br>
 
             <form
                 action="/restaurant/add"
