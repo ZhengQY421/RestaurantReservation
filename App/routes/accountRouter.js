@@ -42,8 +42,8 @@ router.post("/deleteuser", function(req, res, next) {
                 return;
             }
             client.query(
-            "delete from users where uid=$1",
-            [req.body.uid],
+                "delete from users where uid=$1",
+                [req.body.uid],
                 function(err, res3) {
                     if (abort(err)) {
                         return;
@@ -53,18 +53,15 @@ router.post("/deleteuser", function(req, res, next) {
                         if (abort(err)) {
                             return;
                         }
-                        req.flash(
-                            "success",
-                            "Account deleted!"
-                        );
+                        req.flash("success", "Account deleted!");
                         res.redirect("/");
                         done();
                     });
-                });
+                }
+            );
         });
     });
 });
-
 
 /* ---- Post Function for Login ---- */
 router.post(
@@ -144,10 +141,11 @@ router.post("/signup", checkLoggedOut, function(req, res, next) {
                                     );
                                 } else if (req.body.signupType === "Owner") {
                                     req.session.valid = name;
-                                    res.render('restaurant/add', {
-                                        title: 'Add a Restaurant',
+                                    res.render("restaurant/add", {
+                                        title: "Add a Restaurant",
                                         data: data1.rows,
-                                        currentUser: req.user});
+                                        currentUser: req.user
+                                    });
                                     // return;
                                 }
                             }
@@ -180,20 +178,16 @@ router.post("/addOwner", function(req, res, next) {
                 failRegister(req, res);
                 return;
             }
-            if(!req.isAuthenticated) {
+            if (!req.isAuthenticated()) {
                 req.flash(
                     "success",
                     "Account and restaurant created. You may log in now."
                 );
                 res.redirect("/");
             } else {
-                req.flash(
-                    "success",
-                    "Account and restaurant created."
-                );
-                res.redirect("/account/owner_profile")
+                req.flash("success", "Account and restaurant created.");
+                res.redirect("/account/owner_profile");
             }
-            
         }
     );
 });
@@ -303,15 +297,17 @@ router.get("/owner_profile", checkLoggedIn, function(req, res, next) {
             if (err) {
                 console.log(err);
             }
-            if(data.rows.length) {
+            if (data.rows.length) {
                 res.redirect("/branches?name=" + data.rows[0].name);
             } else {
-                req.flash("error", "Please add a restaurant before proceeding!")
+                req.flash(
+                    "error",
+                    "Please add a restaurant before proceeding!"
+                );
                 res.redirect(303, "/restaurant/add");
                 return;
-            }   
+            }
         }
     );
 });
 module.exports = router;
-

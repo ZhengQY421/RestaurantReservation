@@ -76,7 +76,7 @@ router.get("/add", function(req, res, next) {
 });
 
 /* ---- Post for getting restaurant ---- */
-router.post("/add", checkLoggedIn, function(req, res, next) {
+router.post("/add", function(req, res, next) {
     pool.query(
         "select R.rid from restaurants R where R.name=$1",
         [req.body.resName],

@@ -43,9 +43,12 @@ router.get("/", function(req, res, next) {
                                 if (req.user && req.user.isowner) {
                                     path = "restaurant/branches_owner";
                                 }
-                                
-                                if(!req.isAuthenticated()) {
-                                    req.flash("error", "Please login before making a reservation!")
+
+                                if (!req.isAuthenticated()) {
+                                    req.flash(
+                                        "error",
+                                        "Please login before making a reservation!"
+                                    );
                                 }
                                 res.render(path, {
                                     title: req.query.name,
@@ -58,15 +61,17 @@ router.get("/", function(req, res, next) {
                                 });
                             });
                         });
-                    });
-            });
+                    }
+                );
+            }
+        );
     });
 });
 
 /* ---- GET for show all ratings of particular restaurant branches ---- */
 router.get("/ratings", function(req, res, next) {
     pool.query(
-        "select * from ratings natural join branches natural join Users natural join response natural join gives where rid=$1",
+        "select * from ratings natural join branches natural join Users left outer join response natural join gives where rid=$1",
         [req.query.rid],
         function(err, data) {
             if (err) {
@@ -78,7 +83,8 @@ router.get("/ratings", function(req, res, next) {
                 data: data.rows,
                 currentUser: req.user
             });
-        });
+        }
+    );
 });
 
 router.post("/addReview", checkLoggedIn, function(req, res, next) {
